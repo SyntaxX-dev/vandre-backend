@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import type { IUserRepository } from 'src/domain/repositories/user.repository.interface';
 import { User } from '../../domain/entities/user.entity';
@@ -6,6 +6,7 @@ import { User } from '../../domain/entities/user.entity';
 @Injectable()
 export class UserRepository implements IUserRepository {
   private prisma: PrismaClient;
+  private readonly logger: Logger = new Logger(UserRepository.name);
 
   constructor() {
     this.prisma = new PrismaClient();
@@ -45,5 +46,26 @@ export class UserRepository implements IUserRepository {
       user.created_at,
       user.updated_at,
     );
+  }
+
+  async findAll(): Promise<User[]> {
+    try {
+      const users = await this.prisma.user.findMany();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return users.map(
+        (user) =>
+          new User(
+            user.id,
+            user.name,
+            user.email,
+            user.password,
+            user.created_at,
+            user.updated_at,
+          ),
+      );
+    } catch (error) {
+      this.logger.error('Erro ao buscar usuários:', error);
+      throw error;
+    }
   }
 }

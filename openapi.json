@@ -74,6 +74,35 @@
         "tags": [
           "users"
         ]
+      },
+      "get": {
+        "operationId": "UserController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de usuários retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": [
+                    {
+                      "id": "507f1f77bcf86cd799439011",
+                      "name": "John Doe",
+                      "email": "john.doe@example.com",
+                      "password": "123456",
+                      "created_at": "2024-02-23T10:00:00.000Z",
+                      "updated_at": "2024-02-23T10:00:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "Lista todos os usuários",
+        "tags": [
+          "users"
+        ]
       }
     }
   },
