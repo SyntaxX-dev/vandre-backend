@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EnvironmentConfigModule } from './enviroment-config/enviroment-config.module';
+import { DatabaseModule } from './infrastructure/database/database.module';
+import { UserController } from './presentation/controllers/user.controller';
 
 @Module({
   imports: [
@@ -12,9 +13,9 @@ import { EnvironmentConfigModule } from './enviroment-config/enviroment-config.m
       isGlobal: true,
     }),
     EnvironmentConfigModule,
-    MongooseModule.forRoot(process.env.MONGODB_URI!),
+    DatabaseModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, UserController],
   providers: [AppService],
 })
 export class AppModule {}
