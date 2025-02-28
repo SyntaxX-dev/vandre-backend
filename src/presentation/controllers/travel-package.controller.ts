@@ -10,6 +10,10 @@ import {
   Get,
   Put,
   Delete,
+  UploadedFile,
+  HttpException,
+  UseInterceptors,
+  Res,
 } from '@nestjs/common';
 import { TravelPackageRepository } from '../../infrastructure/repositories/travel-package.repository';
 import { CreateTravelPackageUseCase } from 'src/application/usecases/create-travel-package.use-case';
@@ -20,12 +24,28 @@ import {
   ApiBody,
   ApiResponse,
   ApiParam,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { GetAllTravelPackagesUseCase } from 'src/application/usecases/get-all-travel-package.use-case';
 import { GetTravelPackageByIdUseCase } from 'src/application/usecases/get-travel-package-by-id.use-case';
 import { UpdateTravelPackageDto } from 'src/application/dtos/update-travel-package.dto';
 import { UpdateTravelPackageUseCase } from 'src/application/usecases/update-travel-package.use-case';
 import { DeleteTravelPackageUseCase } from 'src/application/usecases/delete-travel-package.use-case';
+import { TravelPackage } from 'src/domain/entities/travelPackage.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+
+export interface TravelPackageResponseDto {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  pdfUrl: string;
+  maxPeople: number;
+  created_at: Date;
+  updated_at: Date;
+  imageUrl?: string;
+}
 
 @ApiTags('travel-packages')
 @Controller('travel-packages')
@@ -58,35 +78,83 @@ export class TravelPackageController {
   }
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Cria um novo pacote de viagem' })
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
   @ApiBody({
-    type: CreateTravelPackageDto,
-    description: 'Dados para criação do pacote de viagem',
+    description: 'Dados do pacote de viagem e imagem (campo "image")',
+    schema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          example: 'Praia de Maragogi',
+          description: 'Nome do pacote de viagem',
+        },
+        price: {
+          type: 'number',
+          example: 1499.99,
+          description: 'Preço da viagem em reais',
+        },
+        description: {
+          type: 'string',
+          example:
+            'Uma incrível viagem para as praias paradisíacas de Maragogi...',
+          description: 'Descrição detalhada do pacote de viagem',
+        },
+        pdfUrl: {
+          type: 'string',
+          example: 'https://example.com/pdf/maragogi-itinerary.pdf',
+          description: 'Link para o PDF com detalhes da viagem',
+        },
+        maxPeople: {
+          type: 'number',
+          example: 20,
+          description: 'Número máximo de pessoas para a viagem',
+        },
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Arquivo da imagem a ser enviado',
+        },
+      },
+      required: [
+        'name',
+        'price',
+        'description',
+        'pdfUrl',
+        'maxPeople',
+        'image',
+      ],
+    },
   })
   @ApiResponse({
     status: 201,
     description: 'Pacote de viagem criado com sucesso',
-    schema: {
-      example: {
-        id: '1675938274892',
-        name: 'Praia de Maragogi',
-        price: 1499.99,
-        description:
-          'Uma incrível viagem para as praias paradisíacas de Maragogi...',
-        imageUrl: 'https://example.com/images/maragogi.jpg',
-        pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
-        maxPeople: 20,
-        created_at: '2024-02-23T10:00:00.000Z',
-        updated_at: '2024-02-23T10:00:00.000Z',
-      },
-    },
+    type: TravelPackage,
   })
-  async create(@Body() createTravelPackageDto: CreateTravelPackageDto) {
-    return await this.createTravelPackageUseCase.execute(
-      createTravelPackageDto,
+  @ApiResponse({
+    status: 400,
+    description:
+      'Requisição inválida. Verifique os dados enviados e se o arquivo de imagem foi informado.',
+  })
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createDto: CreateTravelPackageDto,
+  ): Promise<TravelPackageResponseDto> {
+    if (!file) {
+      throw new HttpException(
+        'O arquivo de imagem é obrigatório',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const travelPackage = await this.createTravelPackageUseCase.execute(
+      createDto,
+      file.buffer,
     );
+    return this.transformResponse(travelPackage);
   }
+
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Lista todos os pacotes de viagem' })
@@ -101,7 +169,7 @@ export class TravelPackageController {
           price: 1499.99,
           description:
             'Uma incrível viagem para as praias paradisíacas de Maragogi...',
-          imageUrl: 'https://example.com/images/maragogi.jpg',
+          imageUrl: '/travel-packages/1675938274892/image',
           pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
           maxPeople: 20,
           created_at: '2024-02-23T10:00:00.000Z',
@@ -110,9 +178,9 @@ export class TravelPackageController {
       ],
     },
   })
-  async findAll() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return await this.getAllTravelPackagesUseCase.execute();
+  async findAll(): Promise<TravelPackageResponseDto[]> {
+    const packages = await this.getAllTravelPackagesUseCase.execute();
+    return packages.map((pkg) => this.transformResponse(pkg));
   }
 
   @Get(':id')
@@ -133,7 +201,7 @@ export class TravelPackageController {
         price: 1499.99,
         description:
           'Uma incrível viagem para as praias paradisíacas de Maragogi...',
-        imageUrl: 'https://example.com/images/maragogi.jpg',
+        imageUrl: '/travel-packages/1675938274892/image',
         pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
         maxPeople: 20,
         created_at: '2024-02-23T10:00:00.000Z',
@@ -145,16 +213,12 @@ export class TravelPackageController {
     status: 404,
     description: 'Pacote de viagem não encontrado',
   })
-  async findById(@Param('id') id: string) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return await this.getTravelPackageByIdUseCase.execute(id);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw error;
+  async findById(@Param('id') id: string): Promise<TravelPackageResponseDto> {
+    const travelPackage = await this.getTravelPackageByIdUseCase.execute(id);
+    if (!travelPackage) {
+      throw new NotFoundException('Pacote de viagem não encontrado');
     }
+    return this.transformResponse(travelPackage);
   }
 
   @Put(':id')
@@ -179,7 +243,7 @@ export class TravelPackageController {
         price: 1599.99,
         description:
           'Uma incrível viagem para as praias paradisíacas de Maragogi com pacote atualizado...',
-        imageUrl: 'https://example.com/images/maragogi-updated.jpg',
+        imageUrl: '/travel-packages/1675938274892/image',
         pdfUrl: 'https://example.com/pdf/maragogi-itinerary-updated.pdf',
         maxPeople: 25,
         created_at: '2024-02-23T10:00:00.000Z',
@@ -194,19 +258,15 @@ export class TravelPackageController {
   async update(
     @Param('id') id: string,
     @Body() updateTravelPackageDto: UpdateTravelPackageDto,
-  ) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return await this.updateTravelPackageUseCase.execute(
-        id,
-        updateTravelPackageDto,
-      );
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw error;
+  ): Promise<TravelPackageResponseDto> {
+    const updatedPackage = await this.updateTravelPackageUseCase.execute(
+      id,
+      updateTravelPackageDto,
+    );
+    if (!updatedPackage) {
+      throw new NotFoundException('Pacote de viagem não encontrado');
     }
+    return this.transformResponse(updatedPackage);
   }
 
   @Delete(':id')
@@ -225,14 +285,46 @@ export class TravelPackageController {
     status: 404,
     description: 'Pacote de viagem não encontrado',
   })
-  async delete(@Param('id') id: string) {
-    try {
-      await this.deleteTravelPackageUseCase.execute(id);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw error;
+  async delete(@Param('id') id: string): Promise<void> {
+    await this.deleteTravelPackageUseCase.execute(id);
+  }
+
+  @Get(':id/image')
+  @ApiOperation({ summary: 'Baixar imagem do pacote de viagem' })
+  @ApiResponse({
+    status: 200,
+    description: 'Imagem retornada com sucesso',
+    content: { 'image/jpeg': {} },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Pacote de viagem ou imagem não encontrada',
+  })
+  async downloadImage(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ): Promise<any> {
+    const travelPackage = await this.travelPackageRepository.findById(id);
+    if (!travelPackage) {
+      throw new NotFoundException('Pacote de viagem não encontrado');
     }
+    if (!travelPackage.image) {
+      throw new NotFoundException(
+        'Imagem não encontrada para esse pacote de viagem',
+      );
+    }
+    res.set({
+      'Content-Type': 'image/jpeg',
+      'Content-Disposition': `attachment; filename="image-${id}.jpg"`,
+    });
+    return res.send(travelPackage.image);
+  }
+
+  private transformResponse(pkg: TravelPackage): TravelPackageResponseDto {
+    const { image, ...data } = pkg;
+    return {
+      ...data,
+      imageUrl: image ? `/travel-packages/${pkg.id}/image` : undefined,
+    };
   }
 }

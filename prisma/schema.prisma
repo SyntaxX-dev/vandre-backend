@@ -22,7 +22,7 @@ model TravelPackage {
   name        String
   price       Float
   description String
-  imageUrl    String
+  image       Bytes 
   pdfUrl      String
   maxPeople   Int
   created_at  DateTime @default(now())

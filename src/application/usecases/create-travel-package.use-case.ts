@@ -7,14 +7,17 @@ export class CreateTravelPackageUseCase {
     private readonly travelPackageRepository: ITravelPackageRepository,
   ) {}
 
-  async execute(dto: CreateTravelPackageDto): Promise<TravelPackage> {
+  async execute(
+    dto: CreateTravelPackageDto,
+    imageBuffer: Buffer,
+  ): Promise<TravelPackage> {
     const now = new Date();
     const travelPackage = new TravelPackage(
-      Date.now().toString(),
+      '',
       dto.name,
       dto.price,
       dto.description,
-      dto.imageUrl,
+      imageBuffer,
       dto.pdfUrl,
       dto.maxPeople,
       now,

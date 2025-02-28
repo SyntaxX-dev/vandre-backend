@@ -6,4 +6,5 @@ export interface ITravelPackageRepository {
   findAll(): Promise<TravelPackage[]>;
   update(travelPackage: TravelPackage): Promise<TravelPackage>;
   delete(id: string): Promise<void>;
+  findImageById(id: string): Promise<Buffer | null>;
 }

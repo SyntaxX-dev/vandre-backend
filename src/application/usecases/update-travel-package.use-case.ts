@@ -11,6 +11,7 @@ export class UpdateTravelPackageUseCase {
   async execute(
     id: string,
     dto: UpdateTravelPackageDto,
+    imageBuffer?: Buffer,
   ): Promise<TravelPackage> {
     const existingPackage = await this.travelPackageRepository.findById(id);
 
@@ -27,7 +28,7 @@ export class UpdateTravelPackageUseCase {
       dto.description !== undefined
         ? dto.description
         : existingPackage.description,
-      dto.imageUrl !== undefined ? dto.imageUrl : existingPackage.imageUrl,
+      imageBuffer !== undefined ? imageBuffer : existingPackage.image,
       dto.pdfUrl !== undefined ? dto.pdfUrl : existingPackage.pdfUrl,
       dto.maxPeople !== undefined ? dto.maxPeople : existingPackage.maxPeople,
       existingPackage.created_at,

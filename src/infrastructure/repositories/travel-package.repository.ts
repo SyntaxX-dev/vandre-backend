@@ -17,11 +17,11 @@ export class TravelPackageRepository implements ITravelPackageRepository {
       const createdPackage = await this.prisma.travelPackage.create({
         data: {
           name: travelPackage.name,
-          price: travelPackage.price,
+          price: Number(travelPackage.price),
           description: travelPackage.description,
-          imageUrl: travelPackage.imageUrl,
+          image: travelPackage.image,
           pdfUrl: travelPackage.pdfUrl,
-          maxPeople: travelPackage.maxPeople,
+          maxPeople: Number(travelPackage.maxPeople),
         },
       });
 
@@ -30,7 +30,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         createdPackage.name,
         createdPackage.price,
         createdPackage.description,
-        createdPackage.imageUrl,
+        Buffer.from(createdPackage.image),
         createdPackage.pdfUrl,
         createdPackage.maxPeople,
         createdPackage.created_at,
@@ -55,7 +55,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         travelPackage.name,
         travelPackage.price,
         travelPackage.description,
-        travelPackage.imageUrl,
+        Buffer.from(travelPackage.image),
         travelPackage.pdfUrl,
         travelPackage.maxPeople,
         travelPackage.created_at,
@@ -71,7 +71,6 @@ export class TravelPackageRepository implements ITravelPackageRepository {
     try {
       const travelPackages = await this.prisma.travelPackage.findMany();
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return travelPackages.map(
         (pkg) =>
           new TravelPackage(
@@ -79,7 +78,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
             pkg.name,
             pkg.price,
             pkg.description,
-            pkg.imageUrl,
+            Buffer.from(pkg.image),
             pkg.pdfUrl,
             pkg.maxPeople,
             pkg.created_at,
@@ -100,7 +99,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           name: travelPackage.name,
           price: travelPackage.price,
           description: travelPackage.description,
-          imageUrl: travelPackage.imageUrl,
+          image: travelPackage.image,
           pdfUrl: travelPackage.pdfUrl,
           maxPeople: travelPackage.maxPeople,
           updated_at: new Date(),
@@ -112,7 +111,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         updatedPackage.name,
         updatedPackage.price,
         updatedPackage.description,
-        updatedPackage.imageUrl,
+        Buffer.from(updatedPackage.image),
         updatedPackage.pdfUrl,
         updatedPackage.maxPeople,
         updatedPackage.created_at,
@@ -135,6 +134,25 @@ export class TravelPackageRepository implements ITravelPackageRepository {
     } catch (error) {
       this.logger.error(
         `Erro ao excluir pacote de viagem com ID ${id}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async findImageById(id: string): Promise<Buffer | null> {
+    try {
+      const travelPackage = await this.prisma.travelPackage.findUnique({
+        where: { id },
+        select: { image: true },
+      });
+
+      if (!travelPackage) return null;
+
+      return travelPackage.image ? Buffer.from(travelPackage.image) : null;
+    } catch (error) {
+      this.logger.error(
+        `Erro ao buscar imagem do pacote de viagem com ID ${id}:`,
         error,
       );
       throw error;

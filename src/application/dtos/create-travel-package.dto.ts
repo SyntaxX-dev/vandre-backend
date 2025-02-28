@@ -28,15 +28,6 @@ export class CreateTravelPackageDto {
   description: string;
 
   @ApiProperty({
-    example: 'https://example.com/images/maragogi.jpg',
-    description: 'URL da imagem do destino',
-  })
-  @IsString()
-  @IsUrl({}, { message: 'A URL da imagem deve ser válida' })
-  @IsNotEmpty({ message: 'A URL da imagem é obrigatória' })
-  imageUrl: string;
-
-  @ApiProperty({
     example: 'https://example.com/pdf/maragogi-itinerary.pdf',
     description: 'Link para o PDF com detalhes da viagem',
   })
