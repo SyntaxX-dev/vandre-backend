@@ -8,6 +8,8 @@ import {
   Param,
   NotFoundException,
   Get,
+  Put,
+  Delete,
 } from '@nestjs/common';
 import { TravelPackageRepository } from '../../infrastructure/repositories/travel-package.repository';
 import { CreateTravelPackageUseCase } from 'src/application/usecases/create-travel-package.use-case';
@@ -21,6 +23,9 @@ import {
 } from '@nestjs/swagger';
 import { GetAllTravelPackagesUseCase } from 'src/application/usecases/get-all-travel-package.use-case';
 import { GetTravelPackageByIdUseCase } from 'src/application/usecases/get-travel-package-by-id.use-case';
+import { UpdateTravelPackageDto } from 'src/application/dtos/update-travel-package.dto';
+import { UpdateTravelPackageUseCase } from 'src/application/usecases/update-travel-package.use-case';
+import { DeleteTravelPackageUseCase } from 'src/application/usecases/delete-travel-package.use-case';
 
 @ApiTags('travel-packages')
 @Controller('travel-packages')
@@ -29,6 +34,8 @@ export class TravelPackageController {
   private readonly createTravelPackageUseCase: CreateTravelPackageUseCase;
   private readonly getAllTravelPackagesUseCase: GetAllTravelPackagesUseCase;
   private readonly getTravelPackageByIdUseCase: GetTravelPackageByIdUseCase;
+  private readonly updateTravelPackageUseCase: UpdateTravelPackageUseCase;
+  private readonly deleteTravelPackageUseCase: DeleteTravelPackageUseCase;
 
   constructor(
     private readonly travelPackageRepository: TravelPackageRepository,
@@ -40,6 +47,12 @@ export class TravelPackageController {
       this.travelPackageRepository,
     );
     this.getTravelPackageByIdUseCase = new GetTravelPackageByIdUseCase(
+      this.travelPackageRepository,
+    );
+    this.updateTravelPackageUseCase = new UpdateTravelPackageUseCase(
+      this.travelPackageRepository,
+    );
+    this.deleteTravelPackageUseCase = new DeleteTravelPackageUseCase(
       this.travelPackageRepository,
     );
   }
@@ -136,6 +149,85 @@ export class TravelPackageController {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return await this.getTravelPackageByIdUseCase.execute(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw error;
+    }
+  }
+
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Atualiza um pacote de viagem' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do pacote de viagem a ser atualizado',
+    example: '1675938274892',
+  })
+  @ApiBody({
+    type: UpdateTravelPackageDto,
+    description: 'Dados a serem atualizados no pacote de viagem',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Pacote de viagem atualizado com sucesso',
+    schema: {
+      example: {
+        id: '1675938274892',
+        name: 'Praia de Maragogi Atualizado',
+        price: 1599.99,
+        description:
+          'Uma incrível viagem para as praias paradisíacas de Maragogi com pacote atualizado...',
+        imageUrl: 'https://example.com/images/maragogi-updated.jpg',
+        pdfUrl: 'https://example.com/pdf/maragogi-itinerary-updated.pdf',
+        maxPeople: 25,
+        created_at: '2024-02-23T10:00:00.000Z',
+        updated_at: '2024-02-23T11:30:00.000Z',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Pacote de viagem não encontrado',
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() updateTravelPackageDto: UpdateTravelPackageDto,
+  ) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return await this.updateTravelPackageUseCase.execute(
+        id,
+        updateTravelPackageDto,
+      );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw error;
+    }
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Exclui um pacote de viagem' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do pacote de viagem a ser excluído',
+    example: '1675938274892',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Pacote de viagem excluído com sucesso',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Pacote de viagem não encontrado',
+  })
+  async delete(@Param('id') id: string) {
+    try {
+      await this.deleteTravelPackageUseCase.execute(id);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
