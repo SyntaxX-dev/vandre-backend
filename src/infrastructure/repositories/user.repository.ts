@@ -51,7 +51,7 @@ export class UserRepository implements IUserRepository {
   async findAll(): Promise<User[]> {
     try {
       const users = await this.prisma.user.findMany();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
       return users.map(
         (user) =>
           new User(
@@ -65,6 +65,43 @@ export class UserRepository implements IUserRepository {
       );
     } catch (error) {
       this.logger.error('Erro ao buscar usuários:', error);
+      throw error;
+    }
+  }
+
+  async update(user: User): Promise<User> {
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          name: user.name,
+          email: user.email,
+          password: user.password,
+          updated_at: new Date(),
+        },
+      });
+
+      return new User(
+        updatedUser.id,
+        updatedUser.name,
+        updatedUser.email,
+        updatedUser.password,
+        updatedUser.created_at,
+        updatedUser.updated_at,
+      );
+    } catch (error) {
+      this.logger.error(`Erro ao atualizar usuário com ID ${user.id}:`, error);
+      throw error;
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      await this.prisma.user.delete({
+        where: { id },
+      });
+    } catch (error) {
+      this.logger.error(`Erro ao excluir usuário com ID ${id}:`, error);
       throw error;
     }
   }

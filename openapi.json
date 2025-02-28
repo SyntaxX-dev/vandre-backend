@@ -104,6 +104,105 @@
           "users"
         ]
       }
+    },
+    "/users/{id}": {
+      "put": {
+        "operationId": "UserController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do usuário a ser atualizado",
+            "schema": {
+              "example": "507f1f77bcf86cd799439011",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Dados a serem atualizados no usuário",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "John Updated",
+                    "description": "Nome atualizado do usuário"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "john.updated@example.com",
+                    "description": "Email atualizado do usuário"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "newpassword",
+                    "description": "Senha atualizada do usuário (mínimo 6 caracteres)"
+                  }
+                },
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuário atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": "507f1f77bcf86cd799439011",
+                    "name": "John Updated",
+                    "email": "john.updated@example.com",
+                    "password": "newpassword",
+                    "created_at": "2024-02-23T10:00:00.000Z",
+                    "updated_at": "2024-02-23T11:15:30.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "summary": "Atualiza um usuário",
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "operationId": "UserController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do usuário a ser excluído",
+            "schema": {
+              "example": "507f1f77bcf86cd799439011",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Usuário excluído com sucesso"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "summary": "Exclui um usuário",
+        "tags": [
+          "users"
+        ]
+      }
     }
   },
   "info": {
@@ -115,6 +214,27 @@
   "tags": [],
   "servers": [],
   "components": {
-    "schemas": {}
+    "schemas": {
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "John Doe",
+            "description": "Nome do usuário"
+          },
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "description": "Email do usuário"
+          },
+          "password": {
+            "type": "string",
+            "example": "123456",
+            "description": "Senha do usuário (mínimo 6 caracteres)"
+          }
+        }
+      }
+    }
   }
 }
