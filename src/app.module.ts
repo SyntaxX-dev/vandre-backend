@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { EnvironmentConfigModule } from './enviroment-config/enviroment-config.module';
 import { DatabaseModule } from './infrastructure/database/database.module';
 import { UserController } from './presentation/controllers/user.controller';
+import { TravelPackageRepository } from './infrastructure/repositories/travel-package.repository';
+import { TravelPackageController } from './presentation/controllers/travel-package.controller';
 
 @Module({
   imports: [
@@ -15,7 +17,7 @@ import { UserController } from './presentation/controllers/user.controller';
     EnvironmentConfigModule,
     DatabaseModule,
   ],
-  controllers: [AppController, UserController],
-  providers: [AppService],
+  controllers: [AppController, UserController, TravelPackageController],
+  providers: [AppService, TravelPackageRepository],
 })
 export class AppModule {}
