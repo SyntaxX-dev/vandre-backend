@@ -105,7 +105,6 @@ export class UserController {
     },
   })
   async findAll() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return await this.getAllUsersUseCase.execute();
   }
 

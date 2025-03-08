@@ -535,6 +535,127 @@
           "travel-packages"
         ]
       }
+    },
+    "/bookings": {
+      "post": {
+        "operationId": "BookingController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Dados para criação da reserva",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBookingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reserva criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": "507f1f77bcf86cd799439011",
+                    "travelPackageId": "507f1f77bcf86cd799439022",
+                    "userId": "507f1f77bcf86cd799439033",
+                    "fullName": "João Silva",
+                    "rg": "12.345.678-9",
+                    "cpf": "123.456.789-00",
+                    "birthDate": "1990-01-01T00:00:00.000Z",
+                    "phone": "(11) 98765-4321",
+                    "email": "joao.silva@example.com",
+                    "boardingLocation": "Terminal Tietê - 08:00",
+                    "created_at": "2024-03-08T10:00:00.000Z",
+                    "updated_at": "2024-03-08T10:00:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou não há mais vagas disponíveis"
+          },
+          "404": {
+            "description": "Pacote de viagem não encontrado"
+          }
+        },
+        "summary": "Cria uma reserva para um pacote de viagem",
+        "tags": [
+          "bookings"
+        ]
+      },
+      "get": {
+        "operationId": "BookingController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de reservas retornada com sucesso"
+          }
+        },
+        "summary": "Lista todas as reservas",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/bookings/{id}": {
+      "get": {
+        "operationId": "BookingController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da reserva",
+            "schema": {
+              "example": "507f1f77bcf86cd799439011",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reserva encontrada com sucesso"
+          },
+          "404": {
+            "description": "Reserva não encontrada"
+          }
+        },
+        "summary": "Busca uma reserva pelo ID",
+        "tags": [
+          "bookings"
+        ]
+      },
+      "delete": {
+        "operationId": "BookingController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da reserva a ser cancelada",
+            "schema": {
+              "example": "507f1f77bcf86cd799439011",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Reserva cancelada com sucesso"
+          },
+          "404": {
+            "description": "Reserva não encontrada"
+          }
+        },
+        "summary": "Cancela uma reserva",
+        "tags": [
+          "bookings"
+        ]
+      }
     }
   },
   "info": {
@@ -570,6 +691,61 @@
       "TravelPackage": {
         "type": "object",
         "properties": {}
+      },
+      "CreateBookingDto": {
+        "type": "object",
+        "properties": {
+          "travelPackageId": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011",
+            "description": "ID do pacote de viagem"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "João Silva",
+            "description": "Nome completo do passageiro"
+          },
+          "rg": {
+            "type": "string",
+            "example": "12.345.678-9",
+            "description": "RG do passageiro"
+          },
+          "cpf": {
+            "type": "string",
+            "example": "123.456.789-00",
+            "description": "CPF do passageiro"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "1990-01-01",
+            "description": "Data de nascimento do passageiro"
+          },
+          "phone": {
+            "type": "string",
+            "example": "(11) 98765-4321",
+            "description": "Telefone do passageiro"
+          },
+          "email": {
+            "type": "string",
+            "example": "joao.silva@example.com",
+            "description": "Email do passageiro"
+          },
+          "boardingLocation": {
+            "type": "string",
+            "example": "Terminal Tietê - 08:00",
+            "description": "Local de embarque selecionado"
+          }
+        },
+        "required": [
+          "travelPackageId",
+          "fullName",
+          "rg",
+          "cpf",
+          "birthDate",
+          "phone",
+          "email",
+          "boardingLocation"
+        ]
       }
     }
   }

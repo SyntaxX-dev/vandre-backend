@@ -7,6 +7,8 @@ import { DatabaseModule } from './infrastructure/database/database.module';
 import { UserController } from './presentation/controllers/user.controller';
 import { TravelPackageRepository } from './infrastructure/repositories/travel-package.repository';
 import { TravelPackageController } from './presentation/controllers/travel-package.controller';
+import { BookingController } from './presentation/controllers/booking.controller';
+import { BookingRepository } from './infrastructure/repositories/booking.repository';
 
 @Module({
   imports: [
@@ -17,7 +19,12 @@ import { TravelPackageController } from './presentation/controllers/travel-packa
     EnvironmentConfigModule,
     DatabaseModule,
   ],
-  controllers: [AppController, UserController, TravelPackageController],
-  providers: [AppService, TravelPackageRepository],
+  controllers: [
+    AppController,
+    UserController,
+    TravelPackageController,
+    BookingController,
+  ],
+  providers: [AppService, TravelPackageRepository, BookingRepository],
 })
 export class AppModule {}
