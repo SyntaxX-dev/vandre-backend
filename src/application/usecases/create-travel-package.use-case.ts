@@ -20,6 +20,7 @@ export class CreateTravelPackageUseCase {
       imageBuffer,
       dto.pdfUrl,
       dto.maxPeople,
+      dto.boardingLocations,
       now,
       now,
     );

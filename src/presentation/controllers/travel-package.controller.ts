@@ -42,6 +42,7 @@ export interface TravelPackageResponseDto {
   description: string;
   pdfUrl: string;
   maxPeople: number;
+  boardingLocations: string[];
   created_at: Date;
   updated_at: Date;
   imageUrl?: string;
@@ -111,6 +112,14 @@ export class TravelPackageController {
           example: 20,
           description: 'Número máximo de pessoas para a viagem',
         },
+        boardingLocations: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          example: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
+          description: 'Locais de embarque',
+        },
         image: {
           type: 'string',
           format: 'binary',
@@ -123,6 +132,7 @@ export class TravelPackageController {
         'description',
         'pdfUrl',
         'maxPeople',
+        'boardingLocations',
         'image',
       ],
     },
@@ -146,6 +156,11 @@ export class TravelPackageController {
         'O arquivo de imagem é obrigatório',
         HttpStatus.BAD_REQUEST,
       );
+    }
+    if (typeof createDto.boardingLocations === 'string') {
+      createDto.boardingLocations = [createDto.boardingLocations];
+    } else if (!createDto.boardingLocations) {
+      createDto.boardingLocations = [];
     }
 
     const travelPackage = await this.createTravelPackageUseCase.execute(
@@ -172,6 +187,10 @@ export class TravelPackageController {
           imageUrl: '/travel-packages/1675938274892/image',
           pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
           maxPeople: 20,
+          boardingLocations: [
+            'Terminal Tietê - 08:00',
+            'Metrô Tatuapé - 08:30',
+          ],
           created_at: '2024-02-23T10:00:00.000Z',
           updated_at: '2024-02-23T10:00:00.000Z',
         },
@@ -204,6 +223,7 @@ export class TravelPackageController {
         imageUrl: '/travel-packages/1675938274892/image',
         pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
         maxPeople: 20,
+        boardingLocations: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
         created_at: '2024-02-23T10:00:00.000Z',
         updated_at: '2024-02-23T10:00:00.000Z',
       },
@@ -230,8 +250,37 @@ export class TravelPackageController {
     example: '1675938274892',
   })
   @ApiBody({
-    type: UpdateTravelPackageDto,
-    description: 'Dados a serem atualizados no pacote de viagem',
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'Praia de Maragogi' },
+        price: { type: 'number', example: 1499.99 },
+        description: {
+          type: 'string',
+          example:
+            'Uma incrível viagem para as praias paradisíacas de Maragogi...',
+        },
+        pdfUrl: {
+          type: 'string',
+          example: 'https://example.com/pdf/maragogi-itinerary.pdf',
+        },
+        maxPeople: { type: 'number', example: 20 },
+        boardingLocations: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
+        },
+      },
+      example: {
+        name: 'Praia de Maragogi',
+        price: 1499.99,
+        description:
+          'Uma incrível viagem para as praias paradisíacas de Maragogi...',
+        pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
+        maxPeople: 20,
+        boardingLocations: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
+      },
+    },
   })
   @ApiResponse({
     status: 200,
@@ -246,6 +295,11 @@ export class TravelPackageController {
         imageUrl: '/travel-packages/1675938274892/image',
         pdfUrl: 'https://example.com/pdf/maragogi-itinerary-updated.pdf',
         maxPeople: 25,
+        boardingLocations: [
+          'Terminal Tietê - 07:30',
+          'Metrô Tatuapé - 08:00',
+          'Shopping Aricanduva - 08:30',
+        ],
         created_at: '2024-02-23T10:00:00.000Z',
         updated_at: '2024-02-23T11:30:00.000Z',
       },

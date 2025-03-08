@@ -1,4 +1,11 @@
-import { IsNumber, IsOptional, IsString, IsUrl, Min } from 'class-validator';
+import {
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateTravelPackageDto {
@@ -59,4 +66,14 @@ export class UpdateTravelPackageDto {
   @Min(1, { message: 'O limite de pessoas deve ser maior que zero' })
   @IsOptional()
   maxPeople?: number;
+
+  @ApiProperty({
+    example: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
+    type: [String],
+    description: 'Locais de embarque',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  boardingLocations?: string[];
 }

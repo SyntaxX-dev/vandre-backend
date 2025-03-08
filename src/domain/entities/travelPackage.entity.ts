@@ -7,6 +7,7 @@ export class TravelPackage {
     public readonly image: Buffer,
     public readonly pdfUrl: string,
     public readonly maxPeople: number,
+    public readonly boardingLocations: string[] = [],
     public readonly created_at: Date,
     public readonly updated_at: Date,
   ) {}

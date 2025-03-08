@@ -14,6 +14,11 @@ export class TravelPackageRepository implements ITravelPackageRepository {
 
   async create(travelPackage: TravelPackage): Promise<TravelPackage> {
     try {
+      const boardingLocations = Array.isArray(travelPackage.boardingLocations)
+        ? travelPackage.boardingLocations
+        : typeof travelPackage.boardingLocations === 'string'
+          ? [travelPackage.boardingLocations as unknown as string]
+          : [];
       const createdPackage = await this.prisma.travelPackage.create({
         data: {
           name: travelPackage.name,
@@ -22,6 +27,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           image: travelPackage.image,
           pdfUrl: travelPackage.pdfUrl,
           maxPeople: Number(travelPackage.maxPeople),
+          boardingLocations: boardingLocations,
         },
       });
 
@@ -33,6 +39,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         Buffer.from(createdPackage.image),
         createdPackage.pdfUrl,
         createdPackage.maxPeople,
+        createdPackage.boardingLocations,
         createdPackage.created_at,
         createdPackage.updated_at,
       );
@@ -58,6 +65,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         Buffer.from(travelPackage.image),
         travelPackage.pdfUrl,
         travelPackage.maxPeople,
+        travelPackage.boardingLocations,
         travelPackage.created_at,
         travelPackage.updated_at,
       );
@@ -81,6 +89,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
             Buffer.from(pkg.image),
             pkg.pdfUrl,
             pkg.maxPeople,
+            pkg.boardingLocations,
             pkg.created_at,
             pkg.updated_at,
           ),
@@ -102,6 +111,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           image: travelPackage.image,
           pdfUrl: travelPackage.pdfUrl,
           maxPeople: travelPackage.maxPeople,
+          boardingLocations: travelPackage.boardingLocations,
           updated_at: new Date(),
         },
       });
@@ -114,6 +124,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         Buffer.from(updatedPackage.image),
         updatedPackage.pdfUrl,
         updatedPackage.maxPeople,
+        updatedPackage.boardingLocations,
         updatedPackage.created_at,
         updatedPackage.updated_at,
       );

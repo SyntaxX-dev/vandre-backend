@@ -31,6 +31,9 @@ export class UpdateTravelPackageUseCase {
       imageBuffer !== undefined ? imageBuffer : existingPackage.image,
       dto.pdfUrl !== undefined ? dto.pdfUrl : existingPackage.pdfUrl,
       dto.maxPeople !== undefined ? dto.maxPeople : existingPackage.maxPeople,
+      dto.boardingLocations !== undefined
+        ? dto.boardingLocations
+        : existingPackage.boardingLocations,
       existingPackage.created_at,
       new Date(),
     );

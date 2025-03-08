@@ -1,4 +1,13 @@
-import { IsNotEmpty, IsNumber, IsString, IsUrl, Min } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTravelPackageDto {
@@ -44,4 +53,13 @@ export class CreateTravelPackageDto {
   @Min(1, { message: 'O limite de pessoas deve ser maior que zero' })
   @IsNotEmpty({ message: 'O limite de pessoas é obrigatório' })
   maxPeople: number;
+
+  @IsOptional()
+  @IsArray({ message: 'Locais de embarque deve ser um array' })
+  @ArrayMinSize(1, { message: 'É necessário ao menos um local de embarque' })
+  @IsString({
+    each: true,
+    message: 'Cada local de embarque deve ser uma string',
+  })
+  boardingLocations?: string[];
 }
