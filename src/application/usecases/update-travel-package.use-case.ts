@@ -34,6 +34,9 @@ export class UpdateTravelPackageUseCase {
       dto.boardingLocations !== undefined
         ? dto.boardingLocations
         : existingPackage.boardingLocations,
+      dto.travelMonth !== undefined
+        ? dto.travelMonth
+        : existingPackage.travelMonth,
       existingPackage.created_at,
       new Date(),
     );

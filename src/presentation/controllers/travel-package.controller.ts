@@ -43,6 +43,7 @@ export interface TravelPackageResponseDto {
   pdfUrl: string;
   maxPeople: number;
   boardingLocations: string[];
+  travelMonth: string;
   created_at: Date;
   updated_at: Date;
   imageUrl?: string;
@@ -119,6 +120,11 @@ export class TravelPackageController {
           },
           example: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
           description: 'Locais de embarque',
+        },
+        travelMonth: {
+          type: 'string',
+          example: 'Março',
+          description: 'Mês da viagem',
         },
         image: {
           type: 'string',
@@ -279,6 +285,7 @@ export class TravelPackageController {
         pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
         maxPeople: 20,
         boardingLocations: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
+        travelMonth: 'Março',
       },
     },
   })

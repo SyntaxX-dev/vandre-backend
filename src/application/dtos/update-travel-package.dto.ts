@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  Matches,
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -66,6 +67,19 @@ export class UpdateTravelPackageDto {
   @Min(1, { message: 'O limite de pessoas deve ser maior que zero' })
   @IsOptional()
   maxPeople?: number;
+
+  @ApiProperty({
+    example: 'Janeiro/2026',
+    description: 'Mês/Ano da viagem',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  @Matches(/^[A-Za-zÀ-ÖØ-öø-ÿ]+\/\d{4}$/, {
+    message:
+      'O mês da viagem deve estar no formato "Mês/Ano" (ex: Janeiro/2025)',
+  })
+  travelMonth?: string;
 
   @ApiProperty({
     example: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],

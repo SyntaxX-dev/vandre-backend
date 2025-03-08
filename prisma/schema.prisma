@@ -26,6 +26,7 @@ model TravelPackage {
   description       String
   boardingLocations String[]
   image             Bytes
+  travelMonth       String
   pdfUrl            String
   maxPeople         Int
   created_at        DateTime  @default(now())
@@ -53,4 +54,3 @@ model Booking {
   @@index([userId])
   @@map("bookings")
 }
-

@@ -8,6 +8,7 @@ export class TravelPackage {
     public readonly pdfUrl: string,
     public readonly maxPeople: number,
     public readonly boardingLocations: string[] = [],
+    public readonly travelMonth: string,
     public readonly created_at: Date,
     public readonly updated_at: Date,
   ) {}

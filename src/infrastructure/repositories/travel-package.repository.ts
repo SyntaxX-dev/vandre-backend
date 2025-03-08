@@ -28,6 +28,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           pdfUrl: travelPackage.pdfUrl,
           maxPeople: Number(travelPackage.maxPeople),
           boardingLocations: boardingLocations,
+          travelMonth: travelPackage.travelMonth,
         },
       });
 
@@ -40,6 +41,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         createdPackage.pdfUrl,
         createdPackage.maxPeople,
         createdPackage.boardingLocations,
+        createdPackage.travelMonth,
         createdPackage.created_at,
         createdPackage.updated_at,
       );
@@ -66,6 +68,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         travelPackage.pdfUrl,
         travelPackage.maxPeople,
         travelPackage.boardingLocations,
+        travelPackage.travelMonth,
         travelPackage.created_at,
         travelPackage.updated_at,
       );
@@ -90,6 +93,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
             pkg.pdfUrl,
             pkg.maxPeople,
             pkg.boardingLocations,
+            pkg.travelMonth,
             pkg.created_at,
             pkg.updated_at,
           ),
@@ -112,6 +116,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           pdfUrl: travelPackage.pdfUrl,
           maxPeople: travelPackage.maxPeople,
           boardingLocations: travelPackage.boardingLocations,
+          travelMonth: travelPackage.travelMonth,
           updated_at: new Date(),
         },
       });
@@ -125,6 +130,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         updatedPackage.pdfUrl,
         updatedPackage.maxPeople,
         updatedPackage.boardingLocations,
+        updatedPackage.travelMonth,
         updatedPackage.created_at,
         updatedPackage.updated_at,
       );

@@ -21,6 +21,7 @@ export class CreateTravelPackageUseCase {
       dto.pdfUrl,
       dto.maxPeople,
       dto.boardingLocations,
+      dto.travelMonth,
       now,
       now,
     );

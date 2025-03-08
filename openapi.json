@@ -252,6 +252,11 @@
                     ],
                     "description": "Locais de embarque"
                   },
+                  "travelMonth": {
+                    "type": "string",
+                    "example": "Março",
+                    "description": "Mês da viagem"
+                  },
                   "image": {
                     "type": "string",
                     "format": "binary",
@@ -437,7 +442,8 @@
                   "boardingLocations": [
                     "Terminal Tietê - 08:00",
                     "Metrô Tatuapé - 08:30"
-                  ]
+                  ],
+                  "travelMonth": "Março"
                 }
               }
             }
