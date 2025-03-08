@@ -39,6 +39,12 @@ export class UpdateTravelPackageUseCase {
         : existingPackage.travelMonth,
       existingPackage.created_at,
       new Date(),
+      dto.travelDate !== undefined
+        ? dto.travelDate
+        : existingPackage.travelDate,
+      dto.travelTime !== undefined
+        ? dto.travelTime
+        : existingPackage.travelTime,
     );
 
     return await this.travelPackageRepository.update(updatedPackage);

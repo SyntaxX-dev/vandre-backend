@@ -24,6 +24,8 @@ export class CreateTravelPackageUseCase {
       dto.travelMonth,
       now,
       now,
+      dto.travelDate,
+      dto.travelTime,
     );
     return await this.travelPackageRepository.create(travelPackage);
   }

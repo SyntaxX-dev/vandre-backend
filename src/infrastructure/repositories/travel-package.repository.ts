@@ -29,6 +29,8 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           maxPeople: Number(travelPackage.maxPeople),
           boardingLocations: boardingLocations,
           travelMonth: travelPackage.travelMonth,
+          travelDate: travelPackage.travelDate,
+          travelTime: travelPackage.travelTime,
         },
       });
 
@@ -44,6 +46,8 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         createdPackage.travelMonth,
         createdPackage.created_at,
         createdPackage.updated_at,
+        createdPackage.travelDate,
+        createdPackage.travelTime,
       );
     } catch (error) {
       this.logger.error('Erro ao criar pacote de viagem:', error);
@@ -71,6 +75,8 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         travelPackage.travelMonth,
         travelPackage.created_at,
         travelPackage.updated_at,
+        travelPackage.travelDate,
+        travelPackage.travelTime,
       );
     } catch (error) {
       this.logger.error(`Erro ao buscar pacote de viagem com ID ${id}:`, error);
@@ -96,6 +102,8 @@ export class TravelPackageRepository implements ITravelPackageRepository {
             pkg.travelMonth,
             pkg.created_at,
             pkg.updated_at,
+            pkg.travelDate,
+            pkg.travelTime,
           ),
       );
     } catch (error) {
@@ -117,6 +125,8 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           maxPeople: travelPackage.maxPeople,
           boardingLocations: travelPackage.boardingLocations,
           travelMonth: travelPackage.travelMonth,
+          travelDate: travelPackage.travelDate,
+          travelTime: travelPackage.travelTime,
           updated_at: new Date(),
         },
       });
@@ -133,6 +143,8 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         updatedPackage.travelMonth,
         updatedPackage.created_at,
         updatedPackage.updated_at,
+        updatedPackage.travelDate,
+        updatedPackage.travelTime,
       );
     } catch (error) {
       this.logger.error(
@@ -227,6 +239,8 @@ export class TravelPackageRepository implements ITravelPackageRepository {
             pkg.travelMonth,
             pkg.created_at,
             pkg.updated_at,
+            pkg.travelDate,
+            pkg.travelTime,
           ),
       );
 

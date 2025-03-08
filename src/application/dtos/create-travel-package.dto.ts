@@ -67,6 +67,30 @@ export class CreateTravelPackageDto {
   })
   travelMonth: string;
 
+  @ApiProperty({
+    example: '15/01/2026',
+    description: 'Data da viagem no formato dia/mês/ano',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  @Matches(/^\d{2}\/\d{2}\/\d{4}$/, {
+    message: 'A data deve estar no formato dia/mês/ano (ex: 15/01/2026)',
+  })
+  travelDate?: string;
+
+  @ApiProperty({
+    example: '08:00',
+    description: 'Horário da viagem no formato HH:MM',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'O horário deve estar no formato HH:MM (ex: 08:00)',
+  })
+  travelTime?: string;
+
   @IsOptional()
   @IsArray({ message: 'Locais de embarque deve ser um array' })
   @ArrayMinSize(1, { message: 'É necessário ao menos um local de embarque' })

@@ -27,6 +27,8 @@ model TravelPackage {
   boardingLocations String[]
   image             Bytes
   travelMonth       String
+  travelDate        String?
+  travelTime        String?
   pdfUrl            String
   maxPeople         Int
   created_at        DateTime  @default(now())

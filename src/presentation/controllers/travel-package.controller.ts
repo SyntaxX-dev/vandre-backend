@@ -49,6 +49,8 @@ export interface TravelPackageResponseDto {
   maxPeople: number;
   boardingLocations: string[];
   travelMonth: string;
+  travelDate?: string | null;
+  travelTime?: string | null;
   created_at: Date;
   updated_at: Date;
   imageUrl?: string;
@@ -187,6 +189,16 @@ export class TravelPackageController {
           example: 'Março',
           description: 'Mês da viagem',
         },
+        travelDate: {
+          type: 'string',
+          example: '15/03/2025',
+          description: 'Data da viagem no formato dia/mês/ano (opcional)',
+        },
+        travelTime: {
+          type: 'string',
+          example: '08:00',
+          description: 'Horário da viagem (opcional)',
+        },
         image: {
           type: 'string',
           format: 'binary',
@@ -258,6 +270,9 @@ export class TravelPackageController {
             'Terminal Tietê - 08:00',
             'Metrô Tatuapé - 08:30',
           ],
+          travelMonth: 'Março',
+          travelDate: '15/03/2025',
+          travelTime: '08:00',
           created_at: '2024-02-23T10:00:00.000Z',
           updated_at: '2024-02-23T10:00:00.000Z',
         },
@@ -291,6 +306,9 @@ export class TravelPackageController {
         pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
         maxPeople: 20,
         boardingLocations: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
+        travelMonth: 'Março',
+        travelDate: '15/03/2025',
+        travelTime: '08:00',
         created_at: '2024-02-23T10:00:00.000Z',
         updated_at: '2024-02-23T10:00:00.000Z',
       },
@@ -347,6 +365,8 @@ export class TravelPackageController {
         maxPeople: 20,
         boardingLocations: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
         travelMonth: 'Março',
+        travelDate: '15/03/2025',
+        travelTime: '08:00',
       },
     },
   })
