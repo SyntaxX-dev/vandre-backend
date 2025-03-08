@@ -7,4 +7,9 @@ export interface ITravelPackageRepository {
   update(travelPackage: TravelPackage): Promise<TravelPackage>;
   delete(id: string): Promise<void>;
   findImageById(id: string): Promise<Buffer | null>;
+  findByMonth(
+    month: string,
+    page: number,
+    limit: number,
+  ): Promise<{ data: TravelPackage[]; total: number; pages: number }>;
 }

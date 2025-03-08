@@ -204,6 +204,49 @@
         ]
       }
     },
+    "/travel-packages/filter": {
+      "get": {
+        "operationId": "TravelPackageController_filter",
+        "parameters": [
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "Nome do mês para filtrar (ex: Janeiro)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Número da página",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Itens por página",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de pacotes de viagem retornada com sucesso"
+          }
+        },
+        "summary": "Filtra pacotes de viagem por mês com paginação",
+        "tags": [
+          "travel-packages"
+        ]
+      }
+    },
     "/travel-packages": {
       "post": {
         "operationId": "TravelPackageController_create",

@@ -14,6 +14,7 @@ import {
   HttpException,
   UseInterceptors,
   Res,
+  Query,
 } from '@nestjs/common';
 import { TravelPackageRepository } from '../../infrastructure/repositories/travel-package.repository';
 import { CreateTravelPackageUseCase } from 'src/application/usecases/create-travel-package.use-case';
@@ -25,6 +26,7 @@ import {
   ApiResponse,
   ApiParam,
   ApiConsumes,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { GetAllTravelPackagesUseCase } from 'src/application/usecases/get-all-travel-package.use-case';
 import { GetTravelPackageByIdUseCase } from 'src/application/usecases/get-travel-package-by-id.use-case';
@@ -34,6 +36,9 @@ import { DeleteTravelPackageUseCase } from 'src/application/usecases/delete-trav
 import { TravelPackage } from 'src/domain/entities/travelPackage.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
+import { FilterTravelPackagesUseCase } from 'src/application/usecases/filter-travel-package.use-case';
+import type { FilterTravelPackagesDto } from 'src/application/dtos/filter-travel-package.dto';
+import type { PaginationResponse } from 'src/domain/repositories/pagination.repository.interface';
 
 export interface TravelPackageResponseDto {
   id: string;
@@ -58,6 +63,7 @@ export class TravelPackageController {
   private readonly getTravelPackageByIdUseCase: GetTravelPackageByIdUseCase;
   private readonly updateTravelPackageUseCase: UpdateTravelPackageUseCase;
   private readonly deleteTravelPackageUseCase: DeleteTravelPackageUseCase;
+  private readonly filterTravelPackagesUseCase: FilterTravelPackagesUseCase;
 
   constructor(
     private readonly travelPackageRepository: TravelPackageRepository,
@@ -77,6 +83,61 @@ export class TravelPackageController {
     this.deleteTravelPackageUseCase = new DeleteTravelPackageUseCase(
       this.travelPackageRepository,
     );
+    this.filterTravelPackagesUseCase = new FilterTravelPackagesUseCase(
+      this.travelPackageRepository,
+    );
+  }
+  @Get('filter')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Filtra pacotes de viagem por mês com paginação' })
+  @ApiQuery({
+    name: 'month',
+    required: false,
+    description: 'Nome do mês para filtrar (ex: Janeiro)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Número da página',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Itens por página',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista paginada de pacotes de viagem retornada com sucesso',
+  })
+  async filter(
+    @Query('month') month?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ): Promise<PaginationResponse<TravelPackageResponseDto>> {
+    let processedMonth = month;
+
+    if (processedMonth && processedMonth.includes('/')) {
+      processedMonth = processedMonth.split('/')[0];
+    }
+
+    const filterDto: FilterTravelPackagesDto = {
+      month: processedMonth,
+      page: page || 1,
+      limit: limit || 10,
+    };
+
+    const result = await this.filterTravelPackagesUseCase.execute(filterDto);
+
+    const transformedData = result.data.map((pkg) =>
+      this.transformResponse(pkg),
+    );
+
+    return {
+      data: transformedData,
+      meta: result.meta,
+    };
   }
 
   @Post()
