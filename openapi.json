@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/": {
+    "/api": {
       "get": {
         "operationId": "AppController_getHello",
         "parameters": [],
@@ -15,7 +15,7 @@
         ]
       }
     },
-    "/users": {
+    "/api/users": {
       "post": {
         "operationId": "UserController_create",
         "parameters": [],
@@ -105,7 +105,7 @@
         ]
       }
     },
-    "/users/{id}": {
+    "/api/users/{id}": {
       "put": {
         "operationId": "UserController_update",
         "parameters": [
@@ -204,7 +204,7 @@
         ]
       }
     },
-    "/travel-packages/filter": {
+    "/api/travel-packages/filter": {
       "get": {
         "operationId": "TravelPackageController_filter",
         "parameters": [
@@ -247,7 +247,7 @@
         ]
       }
     },
-    "/travel-packages": {
+    "/api/travel-packages": {
       "post": {
         "operationId": "TravelPackageController_create",
         "parameters": [],
@@ -388,7 +388,7 @@
         ]
       }
     },
-    "/travel-packages/{id}": {
+    "/api/travel-packages/{id}": {
       "get": {
         "operationId": "TravelPackageController_findById",
         "parameters": [
@@ -573,7 +573,7 @@
         ]
       }
     },
-    "/travel-packages/{id}/image": {
+    "/api/travel-packages/{id}/image": {
       "get": {
         "operationId": "TravelPackageController_downloadImage",
         "parameters": [
@@ -603,7 +603,7 @@
         ]
       }
     },
-    "/bookings": {
+    "/api/bookings": {
       "post": {
         "operationId": "BookingController_create",
         "parameters": [],
@@ -668,7 +668,7 @@
         ]
       }
     },
-    "/bookings/{id}": {
+    "/api/bookings/{id}": {
       "get": {
         "operationId": "BookingController_findById",
         "parameters": [
@@ -727,7 +727,7 @@
   },
   "info": {
     "title": "API do Meu Projeto",
-    "description": "Documentação da API do Meu Projeto",
+    "description": "Documentação da API",
     "version": "1.0",
     "contact": {}
   },
