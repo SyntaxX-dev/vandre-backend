@@ -7,43 +7,39 @@ import * as mongoose from 'mongoose';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT || 3000;
-  
-  // Enable CORS for Vercel deployment
-  app.enableCors();
-  
-  // Define a prefix for all API routes
+
+  // 🔹 Define um prefixo para todas as rotas da API
   app.setGlobalPrefix('api');
 
-  // Connect to MongoDB
+  // 🔹 Conectar ao MongoDB
   await mongoose.connect(
     process.env.MONGO_URI || 'mongodb://localhost:27017/meuBanco',
   );
+
   mongoose.connection.on('connected', () =>
-    console.log('✅ Connected to MongoDB!'),
+    console.log('✅ Conectado ao MongoDB!'),
   );
   mongoose.connection.on('error', (error) =>
-    console.error('❌ MongoDB Error:', error),
+    console.error('❌ Erro no MongoDB:', error),
   );
 
-  // Configure Swagger (only in development)
+  // 🔹 Configurar Swagger (somente em desenvolvimento)
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
-      .setTitle('My Project API')
-      .setDescription('API Documentation')
+      .setTitle('API do Meu Projeto')
+      .setDescription('Documentação da API')
       .setVersion('1.0')
       .build();
+
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
-    
-    // Only write file in local environment
-    if (process.env.NODE_ENV === 'development') {
-      writeFileSync('./openapi.json', JSON.stringify(document, null, 2));
-    }
-    
-    console.log(`📖 Swagger available at: http://localhost:${port}/api/docs`);
+    writeFileSync('./openapi.json', JSON.stringify(document, null, 2));
+
+    console.log(`📖 Swagger disponível em: http://localhost:${port}/api/docs`);
   }
 
   await app.listen(port, '0.0.0.0');
-  console.log(`🚀 API running at: http://localhost:${port}/api`);
+
+  console.log(`🚀 API rodando em: http://localhost:${port}/api`);
 }
 bootstrap();
