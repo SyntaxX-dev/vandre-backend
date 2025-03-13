@@ -16,17 +16,14 @@ async function bootstrap() {
   }
 
   // Configure Swagger (in-memory only)
-  if (process.env.NODE_ENV !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('API do Meu Projeto')
-      .setDescription('Documentação da API')
-      .setVersion('1.0')
-      .build();
+  const config = new DocumentBuilder()
+    .setTitle('API do Meu Projeto')
+    .setDescription('Documentação da API')
+    .setVersion('1.0')
+    .build();
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
-    // Remove writeFileSync call
-  }
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   // In Vercel, we don't need to specify the port
   await app.listen(process.env.PORT || 3000);
