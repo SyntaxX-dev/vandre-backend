@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaClient, type Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { TravelPackage } from 'src/domain/entities/travelPackage.entity';
 import type { ITravelPackageRepository } from 'src/domain/repositories/travel-package.repository.interface';
 
