@@ -7,7 +7,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
 
-  // Only attempt MongoDB connection when handling requests, not during build
+  // Habilitar CORS
+  app.enableCors({
+    origin: '*', // Permitir todas as origens (altere para domínios específicos em produção)
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+    credentials: true, // Permitir envio de cookies/autenticação
+  });
+
+  // Conectar ao MongoDB se a URI estiver definida
   if (process.env.MONGO_URI) {
     mongoose
       .connect(process.env.MONGO_URI)
@@ -15,7 +23,7 @@ async function bootstrap() {
       .catch((error) => console.error('❌ MongoDB Error:', error));
   }
 
-  // Configure Swagger (in-memory only)
+  // Configurar Swagger
   const config = new DocumentBuilder()
     .setTitle('API do Meu Projeto')
     .setDescription('Documentação da API')
@@ -25,7 +33,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  // In Vercel, we don't need to specify the port
+  // Iniciar servidor
   await app.listen(process.env.PORT || 3000);
 }
 
