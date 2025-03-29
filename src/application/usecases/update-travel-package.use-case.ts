@@ -2,6 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import type { ITravelPackageRepository } from 'src/domain/repositories/travel-package.repository.interface';
 import type { UpdateTravelPackageDto } from '../dtos/update-travel-package.dto';
 import { TravelPackage } from 'src/domain/entities/travelPackage.entity';
+import { S3 } from 'aws-sdk';
 
 export class UpdateTravelPackageUseCase {
   constructor(
@@ -11,7 +12,7 @@ export class UpdateTravelPackageUseCase {
   async execute(
     id: string,
     dto: UpdateTravelPackageDto,
-    imageBuffer?: Buffer,
+    fileBuffer?: Buffer,
   ): Promise<TravelPackage> {
     const existingPackage = await this.travelPackageRepository.findById(id);
 
@@ -19,6 +20,20 @@ export class UpdateTravelPackageUseCase {
       throw new NotFoundException(
         `Pacote de viagem com ID ${id} não encontrado`,
       );
+    }
+    let updatedImageUrl = existingPackage.imageUrl;
+    if (fileBuffer) {
+      // Faz upload no S3
+      const s3 = new S3();
+      const key = `travel-packages/${Date.now()}-${existingPackage.name}.jpg`;
+      const uploadResult = await s3
+        .upload({
+          Bucket: process.env.AWS_BUCKET_NAME || 'nome-do-seu-bucket',
+          Key: key,
+          Body: fileBuffer,
+        })
+        .promise();
+      updatedImageUrl = uploadResult.Location;
     }
 
     const updatedPackage = new TravelPackage(
@@ -28,7 +43,7 @@ export class UpdateTravelPackageUseCase {
       dto.description !== undefined
         ? dto.description
         : existingPackage.description,
-      imageBuffer !== undefined ? imageBuffer : existingPackage.image,
+      updatedImageUrl,
       dto.pdfUrl !== undefined ? dto.pdfUrl : existingPackage.pdfUrl,
       dto.maxPeople !== undefined ? dto.maxPeople : existingPackage.maxPeople,
       dto.boardingLocations !== undefined

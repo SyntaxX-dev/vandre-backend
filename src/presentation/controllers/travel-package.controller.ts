@@ -450,23 +450,19 @@ export class TravelPackageController {
     if (!travelPackage) {
       throw new NotFoundException('Pacote de viagem não encontrado');
     }
-    if (!travelPackage.image) {
+    if (!travelPackage.imageUrl) {
       throw new NotFoundException(
         'Imagem não encontrada para esse pacote de viagem',
       );
     }
-    res.set({
-      'Content-Type': 'image/jpeg',
-      'Content-Disposition': `attachment; filename="image-${id}.jpg"`,
-    });
-    return res.send(travelPackage.image);
+    return res.json({ imageUrl: travelPackage.imageUrl });
   }
 
   private transformResponse(pkg: TravelPackage): TravelPackageResponseDto {
-    const { image, ...data } = pkg;
+    const { imageUrl, ...data } = pkg;
     return {
       ...data,
-      imageUrl: image ? `/travel-packages/${pkg.id}/image` : undefined,
+      imageUrl: imageUrl,
     };
   }
 }

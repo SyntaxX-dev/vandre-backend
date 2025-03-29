@@ -24,7 +24,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           name: travelPackage.name,
           price: Number(travelPackage.price),
           description: travelPackage.description,
-          image: travelPackage.image,
+          imageUrl: travelPackage.imageUrl,
           pdfUrl: travelPackage.pdfUrl,
           maxPeople: Number(travelPackage.maxPeople),
           boardingLocations: boardingLocations,
@@ -39,7 +39,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         createdPackage.name,
         createdPackage.price,
         createdPackage.description,
-        Buffer.from(createdPackage.image),
+        createdPackage.imageUrl,
         createdPackage.pdfUrl,
         createdPackage.maxPeople,
         createdPackage.boardingLocations,
@@ -68,7 +68,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         travelPackage.name,
         travelPackage.price,
         travelPackage.description,
-        Buffer.from(travelPackage.image),
+        travelPackage.imageUrl,
         travelPackage.pdfUrl,
         travelPackage.maxPeople,
         travelPackage.boardingLocations,
@@ -95,7 +95,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
             pkg.name,
             pkg.price,
             pkg.description,
-            Buffer.from(pkg.image),
+            pkg.imageUrl,
             pkg.pdfUrl,
             pkg.maxPeople,
             pkg.boardingLocations,
@@ -120,7 +120,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           name: travelPackage.name,
           price: travelPackage.price,
           description: travelPackage.description,
-          image: travelPackage.image,
+          imageUrl: travelPackage.imageUrl,
           pdfUrl: travelPackage.pdfUrl,
           maxPeople: travelPackage.maxPeople,
           boardingLocations: travelPackage.boardingLocations,
@@ -136,7 +136,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         updatedPackage.name,
         updatedPackage.price,
         updatedPackage.description,
-        Buffer.from(updatedPackage.image),
+        updatedPackage.imageUrl,
         updatedPackage.pdfUrl,
         updatedPackage.maxPeople,
         updatedPackage.boardingLocations,
@@ -173,12 +173,14 @@ export class TravelPackageRepository implements ITravelPackageRepository {
     try {
       const travelPackage = await this.prisma.travelPackage.findUnique({
         where: { id },
-        select: { image: true },
+        select: { imageUrl: true },
       });
 
       if (!travelPackage) return null;
 
-      return travelPackage.image ? Buffer.from(travelPackage.image) : null;
+      return travelPackage.imageUrl
+        ? Buffer.from(travelPackage.imageUrl)
+        : null;
     } catch (error) {
       this.logger.error(
         `Erro ao buscar imagem do pacote de viagem com ID ${id}:`,
@@ -232,7 +234,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
             pkg.name,
             pkg.price,
             pkg.description,
-            Buffer.from(pkg.image),
+            pkg.imageUrl,
             pkg.pdfUrl,
             pkg.maxPeople,
             pkg.boardingLocations,

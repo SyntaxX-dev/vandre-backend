@@ -2,20 +2,20 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as mongoose from 'mongoose';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
 
-  // Habilitar CORS
   app.enableCors({
-    origin: '*', // Permitir todas as origens (altere para domínios específicos em produção)
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
-    credentials: true, // Permitir envio de cookies/autenticação
+    credentials: true,
   });
 
-  // Conectar ao MongoDB se a URI estiver definida
   if (process.env.MONGO_URI) {
     mongoose
       .connect(process.env.MONGO_URI)
@@ -23,18 +23,17 @@ async function bootstrap() {
       .catch((error) => console.error('❌ MongoDB Error:', error));
   }
 
-  // Configurar Swagger
   const config = new DocumentBuilder()
     .setTitle('API do Meu Projeto')
     .setDescription('Documentação da API')
+    .addServer('http://localhost:3001')
     .setVersion('1.0')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  // Iniciar servidor
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(process.env.PORT || 3001);
 }
 
 bootstrap();
