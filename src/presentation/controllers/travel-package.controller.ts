@@ -53,7 +53,7 @@ export interface TravelPackageResponseDto {
   travelTime?: string | null;
   created_at: Date;
   updated_at: Date;
-  imageUrl?: string;
+  imageUrl?: string | null;
 }
 
 @ApiTags('travel-packages')
@@ -462,7 +462,7 @@ export class TravelPackageController {
     const { imageUrl, ...data } = pkg;
     return {
       ...data,
-      imageUrl: imageUrl,
+      imageUrl: imageUrl || undefined,
     };
   }
 }

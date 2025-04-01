@@ -4,7 +4,7 @@ export class TravelPackage {
     public readonly name: string,
     public readonly price: number,
     public readonly description: string,
-    public readonly imageUrl: string,
+    public readonly imageUrl: string | null,
     public readonly pdfUrl: string,
     public readonly maxPeople: number,
     public readonly boardingLocations: string[] = [],
