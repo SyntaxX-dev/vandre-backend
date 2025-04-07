@@ -39,7 +39,6 @@ import { Response } from 'express';
 import { FilterTravelPackagesUseCase } from 'src/application/usecases/filter-travel-package.use-case';
 import type { FilterTravelPackagesDto } from 'src/application/dtos/filter-travel-package.dto';
 import type { PaginationResponse } from 'src/domain/repositories/pagination.repository.interface';
-import { CorsInterceptor } from 'src/infrastructure/interceptors/cors.interceptor';
 
 export interface TravelPackageResponseDto {
   id: string;
@@ -60,7 +59,6 @@ export interface TravelPackageResponseDto {
 @ApiTags('travel-packages')
 @Controller('travel-packages')
 @Injectable()
-@UseInterceptors(CorsInterceptor)
 export class TravelPackageController {
   private readonly createTravelPackageUseCase: CreateTravelPackageUseCase;
   private readonly getAllTravelPackagesUseCase: GetAllTravelPackagesUseCase;
