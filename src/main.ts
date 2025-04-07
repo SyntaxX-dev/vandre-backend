@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import * as mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -8,13 +9,13 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
-
-  app.enableCors({
-    origin: '*',
+  const corsOptions: CorsOptions = {
+    origin: true, // ou liste seus domínios específicos
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
-  });
+  };
+  app.enableCors(corsOptions);
 
   if (process.env.MONGO_URI) {
     mongoose
