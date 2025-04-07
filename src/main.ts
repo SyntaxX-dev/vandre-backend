@@ -17,8 +17,6 @@ async function bootstrap() {
       'Content-Type, Authorization, Accept, Origin, X-Requested-With',
     exposedHeaders: 'Content-Disposition',
     credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
   });
 
   if (process.env.MONGO_URI) {
