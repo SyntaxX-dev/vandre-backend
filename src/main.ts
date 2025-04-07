@@ -9,11 +9,17 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
 
+  // Modificação na configuração CORS
   app.enableCors({
-    origin: 'https://vandre-frontend.vercel.app',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Authorization',
-    });
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders:
+      'Content-Type, Authorization, Accept, Origin, X-Requested-With',
+    exposedHeaders: 'Content-Disposition',
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  });
 
   if (process.env.MONGO_URI) {
     mongoose
