@@ -10,6 +10,7 @@ import {
   NotFoundException,
   Delete,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { UserRepository } from '../../infrastructure/repositories/user.repository';
 import { CreateUserUseCase } from 'src/application/usecases/create-user.use-case';
@@ -20,11 +21,13 @@ import {
   ApiBody,
   ApiResponse,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { GetAllUsersUseCase } from 'src/application/usecases/get-all-users.use-case';
 import { UpdateUserDto } from 'src/application/dtos/update-user.dto';
 import { UpdateUserUseCase } from 'src/application/usecases/update-user.use-case';
 import { DeleteUserUseCase } from 'src/application/usecases/delete-user.use-case';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -43,6 +46,8 @@ export class UserController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Cria um usuário' })
   @ApiBody({
     schema: {
@@ -75,7 +80,6 @@ export class UserController {
         id: '1',
         name: 'John Doe',
         email: 'john.doe@example.com',
-        password: '123456',
         created_at: '2024-02-23T10:00:00.000Z',
         updated_at: '2024-02-23T10:00:00.000Z',
       },
@@ -86,6 +90,8 @@ export class UserController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Lista todos os usuários' })
   @ApiResponse({
@@ -97,7 +103,6 @@ export class UserController {
           id: '507f1f77bcf86cd799439011',
           name: 'John Doe',
           email: 'john.doe@example.com',
-          password: '123456',
           created_at: '2024-02-23T10:00:00.000Z',
           updated_at: '2024-02-23T10:00:00.000Z',
         },
@@ -109,6 +114,8 @@ export class UserController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Atualiza um usuário' })
   @ApiParam({
@@ -148,7 +155,6 @@ export class UserController {
         id: '507f1f77bcf86cd799439011',
         name: 'John Updated',
         email: 'john.updated@example.com',
-        password: 'newpassword',
         created_at: '2024-02-23T10:00:00.000Z',
         updated_at: '2024-02-23T11:15:30.000Z',
       },
@@ -170,6 +176,8 @@ export class UserController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Exclui um usuário' })
   @ApiParam({

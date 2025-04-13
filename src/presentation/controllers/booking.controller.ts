@@ -10,6 +10,7 @@ import {
   NotFoundException,
   Delete,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { BookingRepository } from '../../infrastructure/repositories/booking.repository';
 import { TravelPackageRepository } from '../../infrastructure/repositories/travel-package.repository';
@@ -21,8 +22,10 @@ import {
   ApiBody,
   ApiResponse,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Types } from 'mongoose';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 interface BookingResponseDto {
   id: string;
@@ -131,6 +134,8 @@ export class BookingController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Lista todas as reservas' })
   @ApiResponse({
@@ -142,6 +147,8 @@ export class BookingController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Busca uma reserva pelo ID' })
   @ApiParam({
@@ -167,6 +174,8 @@ export class BookingController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Cancela uma reserva' })
   @ApiParam({

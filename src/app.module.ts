@@ -9,6 +9,7 @@ import { TravelPackageRepository } from './infrastructure/repositories/travel-pa
 import { TravelPackageController } from './presentation/controllers/travel-package.controller';
 import { BookingController } from './presentation/controllers/booking.controller';
 import { BookingRepository } from './infrastructure/repositories/booking.repository';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { BookingRepository } from './infrastructure/repositories/booking.reposit
     }),
     EnvironmentConfigModule,
     DatabaseModule,
+    AuthModule,
   ],
   controllers: [
     AppController,

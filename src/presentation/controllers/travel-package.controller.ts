@@ -15,6 +15,7 @@ import {
   UseInterceptors,
   Res,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { TravelPackageRepository } from '../../infrastructure/repositories/travel-package.repository';
 import { CreateTravelPackageUseCase } from 'src/application/usecases/create-travel-package.use-case';
@@ -27,6 +28,7 @@ import {
   ApiParam,
   ApiConsumes,
   ApiQuery,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { GetAllTravelPackagesUseCase } from 'src/application/usecases/get-all-travel-package.use-case';
 import { GetTravelPackageByIdUseCase } from 'src/application/usecases/get-travel-package-by-id.use-case';
@@ -39,6 +41,7 @@ import { Response } from 'express';
 import { FilterTravelPackagesUseCase } from 'src/application/usecases/filter-travel-package.use-case';
 import type { FilterTravelPackagesDto } from 'src/application/dtos/filter-travel-package.dto';
 import type { PaginationResponse } from 'src/domain/repositories/pagination.repository.interface';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 export interface TravelPackageResponseDto {
   id: string;
@@ -89,6 +92,7 @@ export class TravelPackageController {
       this.travelPackageRepository,
     );
   }
+  
   @Get('filter')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Filtra pacotes de viagem por mês com paginação' })
@@ -143,6 +147,8 @@ export class TravelPackageController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -327,6 +333,8 @@ export class TravelPackageController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Atualiza um pacote de viagem' })
   @ApiParam({
@@ -412,6 +420,8 @@ export class TravelPackageController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Exclui um pacote de viagem' })
   @ApiParam({

@@ -3,11 +3,25 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
+import { ValidationPipe } from '@nestjs/common';
+
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
+
+  // Configurando validação global
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   app.enableCors({
     origin: '*',
@@ -19,21 +33,23 @@ async function bootstrap() {
   if (process.env.MONGO_URI) {
     mongoose
       .connect(process.env.MONGO_URI)
-      .then(() => console.log('✅ Connected to MongoDB!'))
-      .catch((error) => console.error('❌ MongoDB Error:', error));
+      .then(() => console.log('✅ Conectado ao MongoDB!'))
+      .catch((error) => console.error('❌ Erro no MongoDB:', error));
   }
 
   const config = new DocumentBuilder()
-    .setTitle('API do Meu Projeto')
-    .setDescription('Documentação da API')
-    .addServer('http://localhost:3001')
+    .setTitle('API de Pacotes de Viagem')
+    .setDescription('Documentação da API para gerenciamento de pacotes de viagem e reservas')
     .setVersion('1.0')
+    .addServer('http://localhost:3001')
+    .addBearerAuth() // Adiciona suporte para autenticação Bearer no Swagger
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
   await app.listen(process.env.PORT || 3001);
+  console.log(`Servidor iniciado na porta ${process.env.PORT || 3001}`);
 }
 
 bootstrap();
