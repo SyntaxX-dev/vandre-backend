@@ -8,8 +8,10 @@ import {
   IsUrl,
   Matches,
   Min,
+  ValidateIf,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 
 export class CreateTravelPackageDto {
   @ApiProperty({
@@ -27,6 +29,7 @@ export class CreateTravelPackageDto {
   @IsNumber({}, { message: 'O preço deve ser um número válido' })
   @Min(0, { message: 'O preço deve ser maior ou igual a zero' })
   @IsNotEmpty({ message: 'O preço é obrigatório' })
+  @Type(() => Number)
   price: number;
 
   @ApiProperty({
@@ -53,6 +56,7 @@ export class CreateTravelPackageDto {
   @IsNumber({}, { message: 'O limite de pessoas deve ser um número' })
   @Min(1, { message: 'O limite de pessoas deve ser maior que zero' })
   @IsNotEmpty({ message: 'O limite de pessoas é obrigatório' })
+  @Type(() => Number)
   maxPeople: number;
 
   @ApiProperty({
@@ -91,12 +95,17 @@ export class CreateTravelPackageDto {
   })
   travelTime?: string;
 
-  @IsOptional()
+  @ApiProperty({
+    example: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
+    description: 'Locais de embarque (array ou string com valores separados por vírgula)',
+  })
+  @IsNotEmpty({ message: 'Locais de embarque são obrigatórios' })
+  @ValidateIf((o) => Array.isArray(o.boardingLocations))
   @IsArray({ message: 'Locais de embarque deve ser um array' })
   @ArrayMinSize(1, { message: 'É necessário ao menos um local de embarque' })
   @IsString({
     each: true,
     message: 'Cada local de embarque deve ser uma string',
   })
-  boardingLocations?: string[];
+  boardingLocations: string[] | string;
 }

@@ -192,8 +192,8 @@ export class TravelPackageController {
         },
         travelMonth: {
           type: 'string',
-          example: 'Março',
-          description: 'Mês da viagem',
+          example: 'Março/2025',
+          description: 'Mês/Ano da viagem',
         },
         travelDate: {
           type: 'string',
@@ -242,17 +242,31 @@ export class TravelPackageController {
         HttpStatus.BAD_REQUEST,
       );
     }
+    
+    // Tratamento simplificado dos locais de embarque
+    // A lógica mais complexa vai para o use case e repository
     if (typeof createDto.boardingLocations === 'string') {
-      createDto.boardingLocations = [createDto.boardingLocations];
+      // Mantemos como string e deixamos o use case e repository fazerem o parsing
+      // Não fazemos nada aqui
     } else if (!createDto.boardingLocations) {
       createDto.boardingLocations = [];
     }
-
-    const travelPackage = await this.createTravelPackageUseCase.execute(
-      createDto,
-      file.buffer,
-    );
-    return this.transformResponse(travelPackage);
+  
+    try {
+      const travelPackage = await this.createTravelPackageUseCase.execute(
+        createDto,
+        file.buffer,
+      );
+      return this.transformResponse(travelPackage);
+    } catch (error) {
+      if (error.message && error.message.includes('travelMonth')) {
+        throw new HttpException(
+          'O mês da viagem deve estar no formato "Mês/Ano" (ex: Janeiro/2025)',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw error;
+    }
   }
 
   @Get()

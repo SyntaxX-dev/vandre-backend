@@ -14,11 +14,20 @@ export class TravelPackageRepository implements ITravelPackageRepository {
 
   async create(travelPackage: TravelPackage): Promise<TravelPackage> {
     try {
-      const boardingLocations = Array.isArray(travelPackage.boardingLocations)
-        ? travelPackage.boardingLocations
-        : typeof travelPackage.boardingLocations === 'string'
-          ? [travelPackage.boardingLocations as unknown as string]
-          : [];
+      let boardingLocations: string[] = [];
+      
+      if (Array.isArray(travelPackage.boardingLocations)) {
+        boardingLocations = travelPackage.boardingLocations.flatMap(location => {
+          if (typeof location === 'string' && location.includes(',')) {
+            return location.split(',').map(loc => loc.trim());
+          }
+          return location;
+        });
+      } else if (typeof travelPackage.boardingLocations === 'string') {
+        const locationString = travelPackage.boardingLocations as string;
+        boardingLocations = locationString.split(',').map(loc => loc.trim());
+      }
+      
       const createdPackage = await this.prisma.travelPackage.create({
         data: {
           name: travelPackage.name,
@@ -55,6 +64,66 @@ export class TravelPackageRepository implements ITravelPackageRepository {
     }
   }
 
+  // Também precisamos atualizar o método update para manter a consistência
+  async update(travelPackage: TravelPackage): Promise<TravelPackage> {
+    try {
+      // Mesmo processamento para o método update
+      let boardingLocations: string[] = [];
+      
+      if (Array.isArray(travelPackage.boardingLocations)) {
+        boardingLocations = travelPackage.boardingLocations.flatMap(location => {
+          if (typeof location === 'string' && location.includes(',')) {
+            return location.split(',').map(loc => loc.trim());
+          }
+          return location;
+        });
+      } else if (typeof travelPackage.boardingLocations === 'string') {
+        const locationString = travelPackage.boardingLocations as string;
+        boardingLocations = locationString.split(',').map(loc => loc.trim());
+      }
+      
+      const updatedPackage = await this.prisma.travelPackage.update({
+        where: { id: travelPackage.id },
+        data: {
+          name: travelPackage.name,
+          price: travelPackage.price,
+          description: travelPackage.description,
+          imageUrl: travelPackage.imageUrl || '',
+          pdfUrl: travelPackage.pdfUrl,
+          maxPeople: travelPackage.maxPeople,
+          boardingLocations: boardingLocations,
+          travelMonth: travelPackage.travelMonth,
+          travelDate: travelPackage.travelDate,
+          travelTime: travelPackage.travelTime,
+          updated_at: new Date(),
+        },
+      });
+
+      return new TravelPackage(
+        updatedPackage.id,
+        updatedPackage.name,
+        updatedPackage.price,
+        updatedPackage.description,
+        updatedPackage.imageUrl,
+        updatedPackage.pdfUrl,
+        updatedPackage.maxPeople,
+        updatedPackage.boardingLocations,
+        updatedPackage.travelMonth,
+        updatedPackage.created_at,
+        updatedPackage.updated_at,
+        updatedPackage.travelDate,
+        updatedPackage.travelTime,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Erro ao atualizar pacote de viagem com ID ${travelPackage.id}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  // Restante dos métodos permanecem iguais
   async findById(id: string): Promise<TravelPackage | null> {
     try {
       const travelPackage = await this.prisma.travelPackage.findUnique({
@@ -108,49 +177,6 @@ export class TravelPackageRepository implements ITravelPackageRepository {
       );
     } catch (error) {
       this.logger.error('Erro ao buscar pacotes de viagem:', error);
-      throw error;
-    }
-  }
-
-  async update(travelPackage: TravelPackage): Promise<TravelPackage> {
-    try {
-      const updatedPackage = await this.prisma.travelPackage.update({
-        where: { id: travelPackage.id },
-        data: {
-          name: travelPackage.name,
-          price: travelPackage.price,
-          description: travelPackage.description,
-          imageUrl: travelPackage.imageUrl || '',
-          pdfUrl: travelPackage.pdfUrl,
-          maxPeople: travelPackage.maxPeople,
-          boardingLocations: travelPackage.boardingLocations,
-          travelMonth: travelPackage.travelMonth,
-          travelDate: travelPackage.travelDate,
-          travelTime: travelPackage.travelTime,
-          updated_at: new Date(),
-        },
-      });
-
-      return new TravelPackage(
-        updatedPackage.id,
-        updatedPackage.name,
-        updatedPackage.price,
-        updatedPackage.description,
-        updatedPackage.imageUrl,
-        updatedPackage.pdfUrl,
-        updatedPackage.maxPeople,
-        updatedPackage.boardingLocations,
-        updatedPackage.travelMonth,
-        updatedPackage.created_at,
-        updatedPackage.updated_at,
-        updatedPackage.travelDate,
-        updatedPackage.travelTime,
-      );
-    } catch (error) {
-      this.logger.error(
-        `Erro ao atualizar pacote de viagem com ID ${travelPackage.id}:`,
-        error,
-      );
       throw error;
     }
   }
