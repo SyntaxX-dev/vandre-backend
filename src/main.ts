@@ -19,23 +19,16 @@ async function bootstrap() {
   };
   app.enableCors(corsOptions);
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
-    }),
-  );
-
-  app.enableCors({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Authorization',
-    credentials: true,
-  });
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     whitelist: true,
+  //     transform: true,
+  //     forbidNonWhitelisted: true,
+  //     transformOptions: {
+  //       enableImplicitConversion: true,
+  //     },
+  //   }),
+  // );
 
   if (process.env.MONGO_URI) {
     mongoose
@@ -49,7 +42,7 @@ async function bootstrap() {
     .setDescription('Documentação da API para gerenciamento de pacotes de viagem e reservas')
     .setVersion('1.0')
     .addServer('http://localhost:3001')
-    .addBearerAuth() // Adiciona suporte para autenticação Bearer no Swagger
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
