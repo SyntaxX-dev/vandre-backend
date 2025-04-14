@@ -4,14 +4,21 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
+  const corsOptions: CorsOptions = {
+    origin: true, 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+    credentials: true,
+  };
+  app.enableCors(corsOptions);
 
-  // Configurando validação global
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
