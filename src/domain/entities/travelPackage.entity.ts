@@ -12,6 +12,7 @@ export class TravelPackage {
     public readonly created_at: Date,
     public readonly updated_at: Date,
     public readonly travelDate?: string | null,
+    public readonly returnDate?: string | null,
     public readonly travelTime?: string | null,
   ) {}
 }

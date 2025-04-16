@@ -57,6 +57,9 @@ export class UpdateTravelPackageUseCase {
       dto.travelDate !== undefined
         ? dto.travelDate
         : existingPackage.travelDate,
+      dto.returnDate !== undefined 
+        ? dto.returnDate 
+        : existingPackage.returnDate,
       dto.travelTime !== undefined
         ? dto.travelTime
         : existingPackage.travelTime,

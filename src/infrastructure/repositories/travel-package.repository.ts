@@ -30,10 +30,11 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           boardingLocations: boardingLocations,
           travelMonth: travelPackage.travelMonth,
           travelDate: travelPackage.travelDate,
+          returnDate: travelPackage.returnDate, // Add this field
           travelTime: travelPackage.travelTime,
         },
       });
-
+  
       return new TravelPackage(
         createdPackage.id,
         createdPackage.name,
@@ -47,6 +48,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         createdPackage.created_at,
         createdPackage.updated_at,
         createdPackage.travelDate,
+        createdPackage.returnDate, // Add this field
         createdPackage.travelTime,
       );
     } catch (error) {
@@ -198,20 +200,20 @@ export class TravelPackageRepository implements ITravelPackageRepository {
     try {
       page = page > 0 ? page : 1;
       limit = limit > 0 && limit <= 100 ? limit : 10;
-
+  
       const skip = (page - 1) * limit;
-
+  
       let whereCondition: Prisma.TravelPackageWhereInput = {};
-
+  
       if (month) {
         whereCondition = {
           travelMonth: {
-            startsWith: month,
+            equals: month,
             mode: 'insensitive',
           },
         };
       }
-
+  
       const travelPackages = await this.prisma.travelPackage.findMany({
         where: whereCondition,
         skip,
@@ -220,13 +222,13 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           created_at: 'desc',
         },
       });
-
+  
       const total = await this.prisma.travelPackage.count({
         where: whereCondition,
       });
-
+  
       const pages = Math.ceil(total / limit);
-
+  
       const data = travelPackages.map(
         (pkg) =>
           new TravelPackage(
@@ -242,10 +244,11 @@ export class TravelPackageRepository implements ITravelPackageRepository {
             pkg.created_at,
             pkg.updated_at,
             pkg.travelDate,
+            pkg.returnDate,
             pkg.travelTime,
           ),
       );
-
+  
       return {
         data,
         total,

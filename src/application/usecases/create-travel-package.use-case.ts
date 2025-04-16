@@ -21,9 +21,9 @@ export class CreateTravelPackageUseCase {
         Body: fileBuffer,
       })
       .promise();
-
+  
     const s3ImageUrl = uploadResult.Location;
-
+  
     const travelPackage = new TravelPackage(
       '',
       dto.name,
@@ -37,6 +37,7 @@ export class CreateTravelPackageUseCase {
       now,
       now,
       dto.travelDate,
+      dto.returnDate,
       dto.travelTime,
     );
     return await this.travelPackageRepository.create(travelPackage);
