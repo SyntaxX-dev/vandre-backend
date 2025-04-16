@@ -48,7 +48,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         createdPackage.created_at,
         createdPackage.updated_at,
         createdPackage.travelDate,
-        createdPackage.returnDate, // Add this field
+        createdPackage.returnDate,
         createdPackage.travelTime,
       );
     } catch (error) {
@@ -78,6 +78,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         travelPackage.created_at,
         travelPackage.updated_at,
         travelPackage.travelDate,
+        travelPackage.returnDate,
         travelPackage.travelTime,
       );
     } catch (error) {
@@ -105,6 +106,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
             pkg.created_at,
             pkg.updated_at,
             pkg.travelDate,
+            pkg.returnDate,
             pkg.travelTime,
           ),
       );
@@ -146,6 +148,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
         updatedPackage.created_at,
         updatedPackage.updated_at,
         updatedPackage.travelDate,
+        updatedPackage.returnDate,
         updatedPackage.travelTime,
       );
     } catch (error) {
