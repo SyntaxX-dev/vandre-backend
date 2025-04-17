@@ -30,7 +30,7 @@ export class TravelPackageRepository implements ITravelPackageRepository {
           boardingLocations: boardingLocations,
           travelMonth: travelPackage.travelMonth,
           travelDate: travelPackage.travelDate,
-          returnDate: travelPackage.returnDate, // Add this field
+          returnDate: travelPackage.returnDate,
           travelTime: travelPackage.travelTime,
         },
       });
