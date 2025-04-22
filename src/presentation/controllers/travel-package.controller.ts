@@ -53,6 +53,7 @@ export interface TravelPackageResponseDto {
   boardingLocations: string[];
   travelMonth: string;
   travelDate?: string | null;
+  returnDate?: string | null;
   travelTime?: string | null;
   created_at: Date;
   updated_at: Date;
@@ -124,10 +125,6 @@ export class TravelPackageController {
   ): Promise<PaginationResponse<TravelPackageResponseDto>> {
     let processedMonth = month;
 
-    if (processedMonth && processedMonth.includes('/')) {
-      processedMonth = processedMonth.split('/')[0];
-    }
-
     const filterDto: FilterTravelPackagesDto = {
       month: processedMonth,
       page: page || 1,
@@ -192,13 +189,18 @@ export class TravelPackageController {
         },
         travelMonth: {
           type: 'string',
-          example: 'Março',
+          example: 'Janeiro',
           description: 'Mês da viagem',
         },
         travelDate: {
           type: 'string',
           example: '15/03/2025',
           description: 'Data da viagem no formato dia/mês/ano (opcional)',
+        },
+        returnDate: {
+          type: 'string',
+          example: '20/03/2025',
+          description: 'Data de retorno da viagem no formato dia/mês/ano (opcional)',
         },
         travelTime: {
           type: 'string',

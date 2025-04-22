@@ -28,6 +28,7 @@ model TravelPackage {
   imageUrl          String?
   travelMonth       String
   travelDate        String?
+  returnDate        String? // Add this field
   travelTime        String?
   pdfUrl            String
   maxPeople         Int

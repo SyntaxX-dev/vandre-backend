@@ -69,15 +69,14 @@ export class UpdateTravelPackageDto {
   maxPeople?: number;
 
   @ApiProperty({
-    example: 'Janeiro/2026',
-    description: 'Mês/Ano da viagem',
+    example: 'Janeiro',
+    description: 'Mês da viagem',
     required: false,
   })
   @IsString()
   @IsOptional()
-  @Matches(/^[A-Za-zÀ-ÖØ-öø-ÿ]+\/\d{4}$/, {
-    message:
-      'O mês da viagem deve estar no formato "Mês/Ano" (ex: Janeiro/2025)',
+  @Matches(/^[A-Za-zÀ-ÖØ-öø-ÿ]+$/, {
+    message: 'O mês da viagem deve conter apenas o nome do mês (ex: Janeiro)',
   })
   travelMonth?: string;
 
@@ -92,6 +91,18 @@ export class UpdateTravelPackageDto {
     message: 'A data deve estar no formato dia/mês/ano (ex: 15/01/2026)',
   })
   travelDate?: string;
+
+  @ApiProperty({
+    example: '20/01/2026',
+    description: 'Data de retorno da viagem no formato dia/mês/ano',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  @Matches(/^\d{2}\/\d{2}\/\d{4}$/, {
+    message: 'A data de retorno deve estar no formato dia/mês/ano (ex: 20/01/2026)',
+  })
+  returnDate?: string;
 
   @ApiProperty({
     example: '08:00',
