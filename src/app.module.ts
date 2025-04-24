@@ -10,6 +10,8 @@ import { TravelPackageController } from './presentation/controllers/travel-packa
 import { BookingController } from './presentation/controllers/booking.controller';
 import { BookingRepository } from './infrastructure/repositories/booking.repository';
 import { AuthModule } from './auth/auth.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer'
 
 @Module({
   imports: [
@@ -20,6 +22,12 @@ import { AuthModule } from './auth/auth.module';
     EnvironmentConfigModule,
     DatabaseModule,
     AuthModule,
+    MulterModule.register({
+      storage: memoryStorage(),
+      limits: {
+        fileSize: 15 * 1024 * 1024, // 15 MB
+      },
+    }),
   ],
   controllers: [
     AppController,

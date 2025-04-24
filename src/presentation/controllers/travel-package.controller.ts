@@ -146,10 +146,31 @@ export class TravelPackageController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @UseInterceptors(FileFieldsInterceptor([
-    { name: 'image', maxCount: 1 },
-    { name: 'pdf', maxCount: 1 }
-  ]))
+  @UseInterceptors(FileFieldsInterceptor(
+    [
+      { name: 'image', maxCount: 1 },
+      { name: 'pdf', maxCount: 1 }
+    ],
+    {
+      limits: {
+        fileSize: 15 * 1024 * 1024, // 15 MB por arquivo
+      },
+      fileFilter: (req, file, cb) => {
+        if (file.fieldname === 'image') {
+          // Aceitar apenas imagens
+          if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+            return cb(new HttpException('Formato de imagem não suportado', HttpStatus.BAD_REQUEST), false);
+          }
+        } else if (file.fieldname === 'pdf') {
+          // Aceitar apenas PDFs
+          if (file.mimetype !== 'application/pdf') {
+            return cb(new HttpException('Apenas arquivos PDF são permitidos', HttpStatus.BAD_REQUEST), false);
+          }
+        }
+        cb(null, true);
+      }
+    }
+  ))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Dados do pacote de viagem com imagem e opcionalmente PDF',
@@ -378,10 +399,31 @@ export class TravelPackageController {
     description: 'ID do pacote de viagem a ser atualizado',
     example: '1675938274892',
   })
-  @UseInterceptors(FileFieldsInterceptor([
-    { name: 'image', maxCount: 1 },
-    { name: 'pdf', maxCount: 1 }
-  ]))
+  @UseInterceptors(FileFieldsInterceptor(
+    [
+      { name: 'image', maxCount: 1 },
+      { name: 'pdf', maxCount: 1 }
+    ],
+    {
+      limits: {
+        fileSize: 15 * 1024 * 1024, // 15 MB por arquivo
+      },
+      fileFilter: (req, file, cb) => {
+        if (file.fieldname === 'image') {
+          // Aceitar apenas imagens
+          if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+            return cb(new HttpException('Formato de imagem não suportado', HttpStatus.BAD_REQUEST), false);
+          }
+        } else if (file.fieldname === 'pdf') {
+          // Aceitar apenas PDFs
+          if (file.mimetype !== 'application/pdf') {
+            return cb(new HttpException('Apenas arquivos PDF são permitidos', HttpStatus.BAD_REQUEST), false);
+          }
+        }
+        cb(null, true);
+      }
+    }
+  ))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
