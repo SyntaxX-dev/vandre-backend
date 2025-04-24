@@ -10,7 +10,7 @@ import {
   Get,
   Put,
   Delete,
-  UploadedFile,
+  UploadedFiles,
   HttpException,
   UseInterceptors,
   Res,
@@ -36,7 +36,7 @@ import { UpdateTravelPackageDto } from 'src/application/dtos/update-travel-packa
 import { UpdateTravelPackageUseCase } from 'src/application/usecases/update-travel-package.use-case';
 import { DeleteTravelPackageUseCase } from 'src/application/usecases/delete-travel-package.use-case';
 import { TravelPackage } from 'src/domain/entities/travelPackage.entity';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { FilterTravelPackagesUseCase } from 'src/application/usecases/filter-travel-package.use-case';
 import type { FilterTravelPackagesDto } from 'src/application/dtos/filter-travel-package.dto';
@@ -50,7 +50,7 @@ export interface TravelPackageResponseDto {
   description: string;
   pdfUrl: string;
   maxPeople: number;
-  boardingLocations: string[];
+  boardingLocations?: string[] | string;
   travelMonth: string;
   travelDate?: string | null;
   returnDate?: string | null;
@@ -146,10 +146,13 @@ export class TravelPackageController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'image', maxCount: 1 },
+    { name: 'pdf', maxCount: 1 }
+  ]))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: 'Dados do pacote de viagem e imagem (campo "image")',
+    description: 'Dados do pacote de viagem com imagem e opcionalmente PDF',
     schema: {
       type: 'object',
       properties: {
@@ -172,7 +175,12 @@ export class TravelPackageController {
         pdfUrl: {
           type: 'string',
           example: 'https://example.com/pdf/maragogi-itinerary.pdf',
-          description: 'Link para o PDF com detalhes da viagem',
+          description: 'Link para o PDF com detalhes da viagem (obrigatório se não enviar arquivo)',
+        },
+        hasPdfFile: {
+          type: 'boolean',
+          example: false,
+          description: 'Indica se está enviando um arquivo PDF',
         },
         maxPeople: {
           type: 'number',
@@ -212,12 +220,16 @@ export class TravelPackageController {
           format: 'binary',
           description: 'Arquivo da imagem a ser enviado',
         },
+        pdf: {
+          type: 'string',
+          format: 'binary',
+          description: 'Arquivo PDF a ser enviado (opcional, alternativa ao pdfUrl)',
+        },
       },
       required: [
         'name',
         'price',
         'description',
-        'pdfUrl',
         'maxPeople',
         'boardingLocations',
         'image',
@@ -235,25 +247,47 @@ export class TravelPackageController {
       'Requisição inválida. Verifique os dados enviados e se o arquivo de imagem foi informado.',
   })
   async create(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: { image?: Express.Multer.File[], pdf?: Express.Multer.File[] },
     @Body() createDto: CreateTravelPackageDto,
   ): Promise<TravelPackageResponseDto> {
-    if (!file) {
+    // Verificação da imagem
+    if (!files.image || files.image.length === 0) {
       throw new HttpException(
         'O arquivo de imagem é obrigatório',
         HttpStatus.BAD_REQUEST,
       );
     }
+    
+    // Validação para o PDF (ou URL ou arquivo)
+    if (createDto.hasPdfFile && (!files.pdf || files.pdf.length === 0)) {
+      throw new HttpException(
+        'O arquivo PDF é obrigatório quando hasPdfFile é true',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    
+    if (!createDto.hasPdfFile && !createDto.pdfUrl) {
+      throw new HttpException(
+        'É necessário fornecer um link para o PDF ou fazer upload do arquivo',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    
+    // Converte boardingLocations para array se necessário
     if (typeof createDto.boardingLocations === 'string') {
       createDto.boardingLocations = [createDto.boardingLocations];
     } else if (!createDto.boardingLocations) {
       createDto.boardingLocations = [];
     }
 
+    const pdfBuffer = files.pdf && files.pdf.length > 0 ? files.pdf[0].buffer : undefined;
+
     const travelPackage = await this.createTravelPackageUseCase.execute(
       createDto,
-      file.buffer,
+      files.image[0].buffer,
+      pdfBuffer,
     );
+    
     return this.transformResponse(travelPackage);
   }
 
@@ -272,7 +306,7 @@ export class TravelPackageController {
           description:
             'Uma incrível viagem para as praias paradisíacas de Maragogi...',
           imageUrl: '/travel-packages/1675938274892/image',
-          pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
+          pdfUrl: 'https://vandre-aws.s3.sa-east-1.amazonaws.com/travel-packages/pdfs/1675938274892-praia-de-maragogi.pdf',
           maxPeople: 20,
           boardingLocations: [
             'Terminal Tietê - 08:00',
@@ -310,8 +344,8 @@ export class TravelPackageController {
         price: 1499.99,
         description:
           'Uma incrível viagem para as praias paradisíacas de Maragogi...',
-        imageUrl: '/travel-packages/1675938274892/image',
-        pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
+        imageUrl: 'https://vandre-aws.s3.sa-east-1.amazonaws.com/travel-packages/images/1675938274892-praia-de-maragogi.jpg',
+        pdfUrl: 'https://vandre-aws.s3.sa-east-1.amazonaws.com/travel-packages/pdfs/1675938274892-praia-de-maragogi.pdf',
         maxPeople: 20,
         boardingLocations: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
         travelMonth: 'Março',
@@ -344,40 +378,82 @@ export class TravelPackageController {
     description: 'ID do pacote de viagem a ser atualizado',
     example: '1675938274892',
   })
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'image', maxCount: 1 },
+    { name: 'pdf', maxCount: 1 }
+  ]))
+  @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        name: { type: 'string', example: 'Praia de Maragogi' },
-        price: { type: 'number', example: 1499.99 },
+        name: { 
+          type: 'string', 
+          example: 'Praia de Maragogi',
+          description: 'Nome do pacote de viagem' 
+        },
+        price: { 
+          type: 'number', 
+          example: 1499.99,
+          description: 'Preço da viagem em reais' 
+        },
         description: {
           type: 'string',
-          example:
-            'Uma incrível viagem para as praias paradisíacas de Maragogi...',
+          example: 'Uma incrível viagem para as praias paradisíacas de Maragogi...',
+          description: 'Descrição detalhada do pacote de viagem'
         },
         pdfUrl: {
           type: 'string',
           example: 'https://example.com/pdf/maragogi-itinerary.pdf',
+          description: 'Link para o PDF com detalhes da viagem (obrigatório se não enviar arquivo)'
         },
-        maxPeople: { type: 'number', example: 20 },
+        hasPdfFile: {
+          type: 'boolean',
+          example: false,
+          description: 'Indica se está enviando um arquivo PDF'
+        },
+        maxPeople: { 
+          type: 'number', 
+          example: 20,
+          description: 'Número máximo de pessoas para a viagem' 
+        },
         boardingLocations: {
           type: 'array',
           items: { type: 'string' },
           example: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
+          description: 'Locais de embarque'
         },
-      },
-      example: {
-        name: 'Praia de Maragogi',
-        price: 1499.99,
-        description:
-          'Uma incrível viagem para as praias paradisíacas de Maragogi...',
-        pdfUrl: 'https://example.com/pdf/maragogi-itinerary.pdf',
-        maxPeople: 20,
-        boardingLocations: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
-        travelMonth: 'Março',
-        travelDate: '15/03/2025',
-        travelTime: '08:00',
-      },
+        travelMonth: { 
+          type: 'string', 
+          example: 'Março',
+          description: 'Mês da viagem' 
+        },
+        travelDate: {
+          type: 'string',
+          example: '15/03/2025',
+          description: 'Data da viagem no formato dia/mês/ano'
+        },
+        returnDate: {
+          type: 'string',
+          example: '20/03/2025',
+          description: 'Data de retorno da viagem no formato dia/mês/ano'
+        },
+        travelTime: {
+          type: 'string',
+          example: '08:00',
+          description: 'Horário da viagem'
+        },
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Arquivo da imagem a ser enviado (opcional)'
+        },
+        pdf: {
+          type: 'string',
+          format: 'binary',
+          description: 'Arquivo PDF a ser enviado (opcional)'
+        }
+      }
     },
   })
   @ApiResponse({
@@ -390,8 +466,8 @@ export class TravelPackageController {
         price: 1599.99,
         description:
           'Uma incrível viagem para as praias paradisíacas de Maragogi com pacote atualizado...',
-        imageUrl: '/travel-packages/1675938274892/image',
-        pdfUrl: 'https://example.com/pdf/maragogi-itinerary-updated.pdf',
+        imageUrl: 'https://vandre-aws.s3.sa-east-1.amazonaws.com/travel-packages/images/1675938274892-praia-de-maragogi-atualizado.jpg',
+        pdfUrl: 'https://vandre-aws.s3.sa-east-1.amazonaws.com/travel-packages/pdfs/1675938274892-praia-de-maragogi-atualizado.pdf',
         maxPeople: 25,
         boardingLocations: [
           'Terminal Tietê - 07:30',
@@ -410,14 +486,45 @@ export class TravelPackageController {
   async update(
     @Param('id') id: string,
     @Body() updateTravelPackageDto: UpdateTravelPackageDto,
+    @UploadedFiles() files: { image?: Express.Multer.File[], pdf?: Express.Multer.File[] },
   ): Promise<TravelPackageResponseDto> {
+    // Pré-processamento de boardingLocations
+    if (typeof updateTravelPackageDto.boardingLocations === 'string') {
+      updateTravelPackageDto.boardingLocations = (updateTravelPackageDto.boardingLocations as string)
+        .split(',')
+        .map(item => item.trim());;
+    } else if (!updateTravelPackageDto.boardingLocations) {
+      // Remove o campo se não for enviado, para evitar sobrescrever com undefined
+      delete updateTravelPackageDto.boardingLocations;
+    }
+  
+    const imageBuffer = files.image && files.image.length > 0 
+      ? files.image[0].buffer 
+      : undefined;
+    
+    const pdfBuffer = files.pdf && files.pdf.length > 0 
+      ? files.pdf[0].buffer 
+      : undefined;
+    
+    // Validação para o PDF (ou URL ou arquivo)
+    if (updateTravelPackageDto.hasPdfFile && !pdfBuffer) {
+      throw new HttpException(
+        'O arquivo PDF é obrigatório quando hasPdfFile é true',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    
     const updatedPackage = await this.updateTravelPackageUseCase.execute(
       id,
       updateTravelPackageDto,
+      imageBuffer,
+      pdfBuffer,
     );
+    
     if (!updatedPackage) {
       throw new NotFoundException('Pacote de viagem não encontrado');
     }
+    
     return this.transformResponse(updatedPackage);
   }
 
@@ -468,6 +575,32 @@ export class TravelPackageController {
       );
     }
     return res.json({ imageUrl: travelPackage.imageUrl });
+  }
+
+  @Get(':id/pdf')
+  @ApiOperation({ summary: 'Baixar PDF do pacote de viagem' })
+  @ApiResponse({
+    status: 200,
+    description: 'URL do PDF retornada com sucesso',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Pacote de viagem ou PDF não encontrado',
+  })
+  async downloadPdf(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ): Promise<any> {
+    const travelPackage = await this.travelPackageRepository.findById(id);
+    if (!travelPackage) {
+      throw new NotFoundException('Pacote de viagem não encontrado');
+    }
+    if (!travelPackage.pdfUrl) {
+      throw new NotFoundException(
+        'PDF não encontrado para esse pacote de viagem',
+      );
+    }
+    return res.json({ pdfUrl: travelPackage.pdfUrl });
   }
 
   private transformResponse(pkg: TravelPackage): TravelPackageResponseDto {

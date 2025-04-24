@@ -42,12 +42,23 @@ export class CreateTravelPackageDto {
 
   @ApiProperty({
     example: 'https://example.com/pdf/maragogi-itinerary.pdf',
-    description: 'Link para o PDF com detalhes da viagem',
+    description: 'Link para o PDF com detalhes da viagem (obrigatório apenas se não enviar arquivo PDF)',
+    required: false,
   })
   @IsString()
   @IsUrl({}, { message: 'A URL do PDF deve ser válida' })
-  @IsNotEmpty({ message: 'O link do PDF é obrigatório' })
-  pdfUrl: string;
+  @ValidateIf(o => !o.hasPdfFile)
+  @IsNotEmpty({ message: 'O link do PDF é obrigatório se não enviar arquivo' })
+  pdfUrl?: string;
+
+  @ApiProperty({
+    example: false,
+    description: 'Indica se foi enviado um arquivo PDF',
+    type: Boolean,
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  hasPdfFile?: boolean;
 
   @ApiProperty({
     example: 20,

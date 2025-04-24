@@ -42,7 +42,7 @@ async function bootstrap() {
     .setDescription('Documentação da API para gerenciamento de pacotes de viagem e reservas')
     .setVersion('1.0')
     .addServer('https://vandre-backend.vercel.app')
-    .addBearerAuth() // Adiciona suporte para autenticação Bearer no Swagger
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

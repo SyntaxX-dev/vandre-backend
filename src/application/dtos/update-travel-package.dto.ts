@@ -6,8 +6,10 @@ import {
   IsUrl,
   Matches,
   Min,
+  ValidateIf,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class UpdateTravelPackageDto {
   @ApiProperty({
@@ -55,8 +57,18 @@ export class UpdateTravelPackageDto {
   })
   @IsString()
   @IsUrl({}, { message: 'A URL do PDF deve ser válida' })
+  @ValidateIf(o => !o.hasPdfFile)
   @IsOptional()
   pdfUrl?: string;
+
+  @ApiProperty({
+    example: false,
+    description: 'Indica se foi enviado um arquivo PDF para atualização',
+    type: Boolean,
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  hasPdfFile?: boolean;
 
   @ApiProperty({
     example: 20,
@@ -119,10 +131,17 @@ export class UpdateTravelPackageDto {
   @ApiProperty({
     example: ['Terminal Tietê - 08:00', 'Metrô Tatuapé - 08:30'],
     type: [String],
-    description: 'Locais de embarque',
+    description: 'Locais de embarque (opcional, pode ser uma string separada por vírgulas ou array)',
+    required: false,
   })
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.split(',').map(item => item.trim());
+    }
+    return value;
+  })
+  @IsArray({ message: 'Os locais de embarque devem ser um array de strings' })
+  @IsString({ each: true, message: 'Cada local de embarque deve ser uma string' })
   boardingLocations?: string[];
 }
