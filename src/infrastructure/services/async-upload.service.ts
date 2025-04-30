@@ -15,7 +15,7 @@ export class AsyncUploadService {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       httpOptions: {
-        timeout: 300000,
+        timeout: 10000,
         connectTimeout: 5000
       },
       maxRetries: 3
@@ -74,12 +74,11 @@ export class AsyncUploadService {
             Body: uploadData.buffer,
             ContentType: uploadData.contentType,
           }).promise();
-          
-          this.logger.log(`Upload concluído: ${uploadData.key} (token: ${token})`);
+          this.logger.log(`Upload concluído com sucesso: ${uploadData.key} (token: ${token})`);
           this.uploadQueue.delete(token);
         } catch (error) {
-          this.logger.error(`Erro ao fazer upload de ${uploadData.key} (token: ${token}): ${error.message}`);
-          // Manter na fila para tentar novamente na próxima execução
+          this.logger.error(`Erro ao fazer upload de ${uploadData.key} (token: ${token}): ${error.message}`, error.stack);
+          throw error; // Ou mantenha na fila para retentativa
         }
       }
     } finally {

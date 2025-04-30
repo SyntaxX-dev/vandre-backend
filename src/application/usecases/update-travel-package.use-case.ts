@@ -19,7 +19,7 @@ export class UpdateTravelPackageUseCase {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       httpOptions: {
-        timeout: 300000,
+        timeout: 10000,
         connectTimeout: 5000
       },
       maxRetries: 3
