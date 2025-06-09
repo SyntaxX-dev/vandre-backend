@@ -41,6 +41,7 @@ import { Response } from 'express';
 import { FilterTravelPackagesUseCase } from 'src/application/usecases/filter-travel-package.use-case';
 import type { FilterTravelPackagesDto } from 'src/application/dtos/filter-travel-package.dto';
 import type { PaginationResponse } from 'src/domain/repositories/pagination.repository.interface';
+import type { SortBy, SortOrder } from 'src/domain/repositories/travel-package.repository.interface';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 export interface TravelPackageResponseDto {
@@ -96,7 +97,7 @@ export class TravelPackageController {
   
   @Get('filter')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Filtra pacotes de viagem por mês com paginação' })
+  @ApiOperation({ summary: 'Filtra pacotes de viagem por mês com paginação e ordenação' })
   @ApiQuery({
     name: 'month',
     required: false,
@@ -114,24 +115,42 @@ export class TravelPackageController {
     description: 'Itens por página',
     type: Number,
   })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    description: 'Campo para ordenação',
+    enum: ['travelDate', 'created_at', 'name', 'price'],
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    description: 'Direção da ordenação',
+    enum: ['asc', 'desc'],
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista paginada de pacotes de viagem retornada com sucesso',
+    description: 'Lista paginada de pacotes de viagem retornada com sucesso, ordenada conforme solicitado',
   })
   async filter(
     @Query('month') month?: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
+    @Query('sortBy') sortBy?: SortBy,
+    @Query('sortOrder') sortOrder?: SortOrder,
   ): Promise<PaginationResponse<TravelPackageResponseDto>> {
-    let processedMonth = month;
-
     const filterDto: FilterTravelPackagesDto = {
-      month: processedMonth,
+      month: month,
       page: page || 1,
       limit: limit || 10,
+      sortBy: sortBy || 'travelDate',
+      sortOrder: sortOrder || 'asc',
     };
 
-    const result = await this.filterTravelPackagesUseCase.execute(filterDto);
+    const result = await this.filterTravelPackagesUseCase.execute(
+      filterDto,
+      filterDto.sortBy,
+      filterDto.sortOrder,
+    );
 
     const transformedData = result.data.map((pkg) =>
       this.transformResponse(pkg),
@@ -314,10 +333,22 @@ export class TravelPackageController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Lista todos os pacotes de viagem' })
+  @ApiOperation({ summary: 'Lista todos os pacotes de viagem com ordenação' })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    description: 'Campo para ordenação',
+    enum: ['travelDate', 'created_at', 'name', 'price'],
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    description: 'Direção da ordenação',
+    enum: ['asc', 'desc'],
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista de pacotes de viagem retornada com sucesso',
+    description: 'Lista de pacotes de viagem retornada com sucesso, ordenada conforme solicitado',
     schema: {
       example: [
         {
@@ -342,8 +373,15 @@ export class TravelPackageController {
       ],
     },
   })
-  async findAll(): Promise<TravelPackageResponseDto[]> {
-    const packages = await this.getAllTravelPackagesUseCase.execute();
+  async findAll(
+    @Query('sortBy') sortBy?: SortBy,
+    @Query('sortOrder') sortOrder?: SortOrder,
+  ): Promise<TravelPackageResponseDto[]> {
+    const packages = await this.getAllTravelPackagesUseCase.execute(
+      sortBy || 'travelDate',
+      sortOrder || 'asc',
+    );
+    
     return packages.map((pkg) => this.transformResponse(pkg));
   }
 

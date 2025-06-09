@@ -1,7 +1,7 @@
 import { User } from 'src/domain/entities/user.entity';
 import type { IUserRepository } from 'src/domain/repositories/user.repository.interface';
 import type { CreateUserDto } from '../dtos/create-user.dto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { ConflictException } from '@nestjs/common';
 
 export class CreateUserUseCase {

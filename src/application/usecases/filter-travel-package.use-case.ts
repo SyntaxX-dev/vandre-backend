@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { TravelPackage } from 'src/domain/entities/travelPackage.entity';
-import { ITravelPackageRepository } from 'src/domain/repositories/travel-package.repository.interface';
+import { ITravelPackageRepository, SortBy, SortOrder } from 'src/domain/repositories/travel-package.repository.interface';
 import type { PaginationResponse } from 'src/domain/repositories/pagination.repository.interface';
 import type { FilterTravelPackagesDto } from '../dtos/filter-travel-package.dto';
 
@@ -12,6 +12,8 @@ export class FilterTravelPackagesUseCase {
 
   async execute(
     filterDto: FilterTravelPackagesDto,
+    sortBy: SortBy = 'travelDate',
+    sortOrder: SortOrder = 'asc'
   ): Promise<PaginationResponse<TravelPackage>> {
     const { month, page = 1, limit = 10 } = filterDto;
 
@@ -19,6 +21,8 @@ export class FilterTravelPackagesUseCase {
       month || '',
       page,
       limit,
+      sortBy,
+      sortOrder,
     );
 
     const { data, total, pages } = result;

@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsInt, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsInt, Min, Max, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -36,4 +36,32 @@ export class FilterTravelPackagesDto {
   @Min(1, { message: 'O limite deve ser pelo menos 1' })
   @Max(100, { message: 'O limite não pode ser maior que 100' })
   limit?: number = 10;
+
+  @ApiProperty({
+    example: 'travelDate',
+    description: 'Campo para ordenação',
+    required: false,
+    default: 'travelDate',
+    enum: ['travelDate', 'created_at', 'name', 'price']
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['travelDate', 'created_at', 'name', 'price'], {
+    message: 'sortBy deve ser um dos valores: travelDate, created_at, name, price'
+  })
+  sortBy?: 'travelDate' | 'created_at' | 'name' | 'price' = 'travelDate';
+
+  @ApiProperty({
+    example: 'asc',
+    description: 'Direção da ordenação',
+    required: false,
+    default: 'asc',
+    enum: ['asc', 'desc']
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['asc', 'desc'], {
+    message: 'sortOrder deve ser asc ou desc'
+  })
+  sortOrder?: 'asc' | 'desc' = 'asc';
 }
