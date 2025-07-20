@@ -38,6 +38,8 @@ interface BookingResponseDto {
   phone: string;
   email: string;
   boardingLocation: string;
+  city: string | null;
+  howDidYouMeetUs: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -81,6 +83,8 @@ export class BookingController {
         phone: '(11) 98765-4321',
         email: 'joao.silva@example.com',
         boardingLocation: 'Terminal Tietê - 08:00',
+        city: 'São Paulo',
+        howDidYouMeetUs: 'Instagram',
         created_at: '2024-03-08T10:00:00.000Z',
         updated_at: '2024-03-08T10:00:00.000Z',
       },
@@ -198,5 +202,69 @@ export class BookingController {
     }
 
     await this.bookingRepository.delete(id);
+  }
+
+  @Get('details')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lista todas as reservas com detalhes do pacote e usuário' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de reservas com detalhes obtida com sucesso',
+  })
+  async getAllWithDetails(): Promise<any[]> {
+    return await this.bookingRepository.findBookingsWithDetails();
+  }
+
+  @Get('stats/city')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtém estatísticas de reservas por cidade' })
+  @ApiResponse({
+    status: 200,
+    description: 'Estatísticas por cidade obtidas com sucesso',
+    schema: {
+      example: [
+        {
+          city: 'São Paulo',
+          totalBookings: 25,
+          averageAge: 32,
+        },
+        {
+          city: 'Rio de Janeiro',
+          totalBookings: 18,
+          averageAge: 28,
+        },
+      ],
+    },
+  })
+  async getStatsByCity(): Promise<any[]> {
+    return await this.bookingRepository.getBookingStatsByCity();
+  }
+
+  @Get('stats/source')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtém estatísticas de como os clientes conheceram a empresa' })
+  @ApiResponse({
+    status: 200,
+    description: 'Estatísticas por fonte obtidas com sucesso',
+    schema: {
+      example: [
+        {
+          source: 'Instagram',
+          totalBookings: 15,
+          percentage: '37.50%',
+        },
+        {
+          source: 'Indicação de amigos',
+          totalBookings: 12,
+          percentage: '30.00%',
+        },
+      ],
+    },
+  })
+  async getStatsBySource(): Promise<any[]> {
+    return await this.bookingRepository.getBookingStatsByHowDidYouMeetUs();
   }
 }

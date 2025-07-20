@@ -48,6 +48,8 @@ model Booking {
   phone            String
   email            String
   boardingLocation String
+  city             String?
+  howDidYouMeetUs  String?
   created_at       DateTime      @default(now())
   updated_at       DateTime      @default(now())
   travelPackage    TravelPackage @relation(fields: [travelPackageId], references: [id], onDelete: Cascade)

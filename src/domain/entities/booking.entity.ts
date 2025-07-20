@@ -10,6 +10,8 @@ export class Booking {
     public readonly phone: string,
     public readonly email: string,
     public readonly boardingLocation: string,
+    public readonly city: string | null,
+    public readonly howDidYouMeetUs: string | null,
     public readonly created_at: Date,
     public readonly updated_at: Date,
   ) {}

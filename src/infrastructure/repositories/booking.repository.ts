@@ -25,6 +25,8 @@ export class BookingRepository implements IBookingRepository {
           phone: booking.phone,
           email: booking.email,
           boardingLocation: booking.boardingLocation,
+          city: booking.city,
+          howDidYouMeetUs: booking.howDidYouMeetUs,
         },
       });
 
@@ -39,6 +41,8 @@ export class BookingRepository implements IBookingRepository {
         createdBooking.phone,
         createdBooking.email,
         createdBooking.boardingLocation,
+        createdBooking.city,
+        createdBooking.howDidYouMeetUs,
         createdBooking.created_at,
         createdBooking.updated_at,
       );
@@ -67,6 +71,8 @@ export class BookingRepository implements IBookingRepository {
         booking.phone,
         booking.email,
         booking.boardingLocation,
+        booking.city,
+        booking.howDidYouMeetUs,
         booking.created_at,
         booking.updated_at,
       );
@@ -93,6 +99,8 @@ export class BookingRepository implements IBookingRepository {
             booking.phone,
             booking.email,
             booking.boardingLocation,
+            booking.city,
+            booking.howDidYouMeetUs,
             booking.created_at,
             booking.updated_at,
           ),
@@ -122,6 +130,8 @@ export class BookingRepository implements IBookingRepository {
             booking.phone,
             booking.email,
             booking.boardingLocation,
+            booking.city,
+            booking.howDidYouMeetUs,
             booking.created_at,
             booking.updated_at,
           ),
@@ -154,6 +164,8 @@ export class BookingRepository implements IBookingRepository {
             booking.phone,
             booking.email,
             booking.boardingLocation,
+            booking.city,
+            booking.howDidYouMeetUs,
             booking.created_at,
             booking.updated_at,
           ),
@@ -181,6 +193,8 @@ export class BookingRepository implements IBookingRepository {
           phone: booking.phone,
           email: booking.email,
           boardingLocation: booking.boardingLocation,
+          city: booking.city,
+          howDidYouMeetUs: booking.howDidYouMeetUs,
           updated_at: new Date(),
         },
       });
@@ -196,6 +210,8 @@ export class BookingRepository implements IBookingRepository {
         updatedBooking.phone,
         updatedBooking.email,
         updatedBooking.boardingLocation,
+        updatedBooking.city,
+        updatedBooking.howDidYouMeetUs,
         updatedBooking.created_at,
         updatedBooking.updated_at,
       );
@@ -215,6 +231,165 @@ export class BookingRepository implements IBookingRepository {
       });
     } catch (error) {
       this.logger.error(`Erro ao excluir reserva com ID ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async findBookingsWithDetails(): Promise<any[]> {
+    try {
+      const result = await this.prisma.booking.aggregateRaw({
+        pipeline: [
+          {
+            $lookup: {
+              from: 'TravelPackage',
+              localField: 'travelPackageId',
+              foreignField: '_id',
+              as: 'travelPackage',
+            },
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'userId',
+              foreignField: '_id',
+              as: 'user',
+            },
+          },
+          {
+            $unwind: {
+              path: '$travelPackage',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $unwind: {
+              path: '$user',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              travelPackageId: 1,
+              userId: 1,
+              fullName: 1,
+              rg: 1,
+              cpf: 1,
+              birthDate: 1,
+              phone: 1,
+              email: 1,
+              boardingLocation: 1,
+              city: 1,
+              howDidYouMeetUs: 1,
+              created_at: 1,
+              updated_at: 1,
+              'travelPackage.name': 1,
+              'travelPackage.price': 1,
+              'travelPackage.travelMonth': 1,
+              'user.name': 1,
+              'user.email': '$user.email',
+            },
+          },
+        ],
+      });
+
+      return result as unknown as any[];
+    } catch (error) {
+      this.logger.error('Erro ao buscar reservas com detalhes:', error);
+      throw error;
+    }
+  }
+
+  async getBookingStatsByCity(): Promise<any[]> {
+    try {
+      const result = await this.prisma.booking.aggregateRaw({
+        pipeline: [
+          {
+            $match: {
+              city: { $ne: null },
+            },
+          },
+          {
+            $group: {
+              _id: '$city',
+              totalBookings: { $sum: 1 },
+              averageAge: {
+                $avg: {
+                  $divide: [
+                    {
+                      $subtract: [new Date(), '$birthDate'],
+                    },
+                    365 * 24 * 60 * 60 * 1000,
+                  ],
+                },
+              },
+            },
+          },
+          {
+            $sort: { totalBookings: -1 },
+          },
+          {
+            $project: {
+              city: '$_id',
+              totalBookings: 1,
+              averageAge: { $round: ['$averageAge', 0] },
+              _id: 0,
+            },
+          },
+        ],
+      });
+
+      return result as unknown as any[];
+    } catch (error) {
+      this.logger.error('Erro ao buscar estatísticas por cidade:', error);
+      throw error;
+    }
+  }
+
+  async getBookingStatsByHowDidYouMeetUs(): Promise<any[]> {
+    try {
+      const result = await this.prisma.booking.aggregateRaw({
+        pipeline: [
+          {
+            $match: {
+              howDidYouMeetUs: { $ne: null },
+            },
+          },
+          {
+            $group: {
+              _id: '$howDidYouMeetUs',
+              totalBookings: { $sum: 1 },
+              percentage: { $sum: 1 },
+            },
+          },
+          {
+            $sort: { totalBookings: -1 },
+          },
+          {
+            $project: {
+              source: '$_id',
+              totalBookings: 1,
+              _id: 0,
+            },
+          },
+        ],
+      });
+
+      const resultArray = result as unknown as any[];
+      const total = resultArray.reduce(
+        (sum, item) => sum + item.totalBookings,
+        0,
+      );
+
+      return resultArray.map((item) => ({
+        ...item,
+        percentage: ((item.totalBookings / total) * 100).toFixed(2) + '%',
+      }));
+    } catch (error) {
+      this.logger.error(
+        'Erro ao buscar estatísticas por como conheceu a empresa:',
+        error,
+      );
       throw error;
     }
   }

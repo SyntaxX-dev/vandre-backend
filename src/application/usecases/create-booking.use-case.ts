@@ -50,6 +50,8 @@ export class CreateBookingUseCase {
       dto.phone,
       dto.email,
       dto.boardingLocation,
+      dto.city || null,
+      dto.howDidYouMeetUs || null,
       now,
       now,
     );

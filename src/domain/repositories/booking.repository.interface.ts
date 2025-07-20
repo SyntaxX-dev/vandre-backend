@@ -8,4 +8,7 @@ export interface IBookingRepository {
   findByUserId(userId: string): Promise<Booking[]>;
   update(booking: Booking): Promise<Booking>;
   delete(id: string): Promise<void>;
+  findBookingsWithDetails(): Promise<any[]>;
+  getBookingStatsByCity(): Promise<any[]>;
+  getBookingStatsByHowDidYouMeetUs(): Promise<any[]>;
 }

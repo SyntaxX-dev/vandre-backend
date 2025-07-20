@@ -74,4 +74,20 @@ export class CreateBookingDto {
   @IsString()
   @IsNotEmpty({ message: 'O local de embarque é obrigatório' })
   boardingLocation: string;
+
+  @ApiProperty({
+    example: 'São Paulo',
+    description: 'Cidade onde o passageiro reside',
+    required: false,
+  })
+  @IsString()
+  city?: string;
+
+  @ApiProperty({
+    example: 'Instagram',
+    description: 'Como conheceu a empresa',
+    required: false,
+  })
+  @IsString()
+  howDidYouMeetUs?: string;
 }
