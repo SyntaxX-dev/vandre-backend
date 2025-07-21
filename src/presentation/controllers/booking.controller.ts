@@ -26,6 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { EmailService } from '../../infrastructure/services/email.service';
 
 interface BookingResponseDto {
   id: string;
@@ -55,6 +56,7 @@ export class BookingController {
   constructor(
     private readonly bookingRepository: BookingRepository,
     private readonly travelPackageRepository: TravelPackageRepository,
+    private readonly emailService: EmailService,
   ) {
     this.createBookingUseCase = new CreateBookingUseCase(
       this.bookingRepository,
@@ -63,14 +65,17 @@ export class BookingController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Cria uma reserva para um pacote de viagem' })
+  @ApiOperation({ 
+    summary: 'Cria uma reserva para um pacote de viagem',
+    description: 'Cria uma nova reserva e envia automaticamente um email de confirmação para o passageiro com todos os detalhes da viagem.'
+  })
   @ApiBody({
     type: CreateBookingDto,
     description: 'Dados para criação da reserva',
   })
   @ApiResponse({
     status: 201,
-    description: 'Reserva criada com sucesso',
+    description: 'Reserva criada com sucesso e email de confirmação enviado automaticamente',
     schema: {
       example: {
         id: '507f1f77bcf86cd799439011',
@@ -121,10 +126,44 @@ export class BookingController {
 
       const generatedUserId = new Types.ObjectId().toString();
 
-      return await this.createBookingUseCase.execute(
+      // Criar a reserva
+      const booking = await this.createBookingUseCase.execute(
         generatedUserId,
         createBookingDto,
       );
+
+      // Enviar email de confirmação (não bloquear se falhar)
+      try {
+        await this.emailService.sendBookingConfirmationEmail(
+          createBookingDto.email,
+          {
+            id: booking.id,
+            fullName: booking.fullName,
+            cpf: booking.cpf,
+            rg: booking.rg,
+            phone: booking.phone,
+            birthDate: booking.birthDate,
+            boardingLocation: booking.boardingLocation,
+            city: booking.city || undefined,
+            howDidYouMeetUs: booking.howDidYouMeetUs || undefined,
+            travelPackage: {
+              name: travelPackage.name,
+              price: travelPackage.price,
+              description: travelPackage.description,
+              travelDate: travelPackage.travelDate || undefined,
+              returnDate: travelPackage.returnDate || undefined,
+              travelTime: travelPackage.travelTime || undefined,
+              travelMonth: travelPackage.travelMonth,
+            },
+          }
+        );
+        console.log(`✅ Email de confirmação enviado para: ${createBookingDto.email}`);
+      } catch (emailError) {
+        console.error('⚠️ Erro ao enviar email de confirmação:', emailError);
+        // Não falhar a reserva se o email não for enviado
+      }
+
+      return booking;
     } catch (error) {
       if (
         error instanceof NotFoundException ||

@@ -11,7 +11,9 @@ import { BookingController } from './presentation/controllers/booking.controller
 import { BookingRepository } from './infrastructure/repositories/booking.repository';
 import { AuthModule } from './auth/auth.module';
 import { MulterModule } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer'
+import { memoryStorage } from 'multer';
+import { TestController } from './presentation/controllers/test.controller';
+import { EmailService } from './infrastructure/services/email.service';
 
 @Module({
   imports: [
@@ -34,7 +36,8 @@ import { memoryStorage } from 'multer'
     UserController,
     TravelPackageController,
     BookingController,
+    TestController,
   ],
-  providers: [AppService, TravelPackageRepository, BookingRepository],
+  providers: [AppService, TravelPackageRepository, BookingRepository, EmailService],
 })
 export class AppModule {}
