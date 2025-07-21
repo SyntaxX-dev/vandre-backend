@@ -14,6 +14,8 @@
     {
       "src": "/(.*)",
       "dest": "dist/main.js",
+      "installCommand": "bun install",
+      "buildCommand": "bun run build",
       "methods": [
         "GET",
         "POST",
